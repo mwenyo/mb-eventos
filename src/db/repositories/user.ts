@@ -12,9 +12,11 @@ import { IUserRepository } from './interfaces/user';
 @injectable()
 export class UserRepository implements IUserRepository {
   private userRepository: Repository<UserEntity> = getRepository(UserEntity);
+
   async create(user: UserEntity): Promise<UserEntity> {
     return this.userRepository.save(user);
   }
+
   async selectPagination(searchParameter: ISearchParameterUser): Promise<Pagination<UserEntity>> {
     let where: any = { deletedAt: null };
     if (searchParameter.name) {
@@ -73,8 +75,8 @@ export class UserRepository implements IUserRepository {
     return this.userRepository.update(id, user);
   }
 
-  async selectByWhere(where: FindConditions<UserEntity>): Promise<UserEntity | null> {
-    return this.userRepository.findOne({ where });
+  async selectByWhere(where: FindManyOptions<UserEntity>): Promise<UserEntity[] | null> {
+    return this.userRepository.find(where);
   }
 
   async deleteById(id: string): Promise<DeleteResult> {

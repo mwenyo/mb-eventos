@@ -7,7 +7,7 @@ export interface IUserRepository {
   selectById(id: string, options?: FindOneOptions<UserEntity>): Promise<UserEntity | null>;
   updateById(id: string, user: UserEntity): Promise<UpdateResult>;
   selectByIdList(idList: string[]): Promise<UserEntity[] | null>;
-  selectByWhere(where: FindConditions<UserEntity>): Promise<UserEntity | null>;
+  selectByWhere(where: FindManyOptions<UserEntity>): Promise<UserEntity[] | null>;
   selectOneByOptions(options: FindOneOptions<UserEntity>): Promise<UserEntity | null>;
   selectPagination(searchParameter: ISearchParameterBase): Promise<Pagination<UserEntity>>;
   selectAllByOptions(options: FindManyOptions<UserEntity>): Promise<UserEntity[] | null>;
