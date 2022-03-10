@@ -21,6 +21,5 @@ const loadSecretEnv: any = async (): Promise<void> => {
 
   const { Server } = require('./server');
 
-  // tslint:disable-next-line: no-unused-expression
   new Server();
 })().catch((err: any): void => console.error(err));

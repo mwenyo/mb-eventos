@@ -40,7 +40,7 @@ export class UserService implements IUserService {
         ]
       }
     );
-    if (existInformation) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
+    if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
     newUser = {
       ...newUser,
       ...newUser.password && { password: await hash(newUser.password, 10) },
@@ -58,10 +58,8 @@ export class UserService implements IUserService {
   }
 
   async updateById(user: UserEntity, additionalInformation: AdditionalInformation): Promise<UserDTO> {
-    const { actor } = additionalInformation;
     const existUser = await this.userRepository.selectById(user.id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
-    if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN)) throw new BusinessError(ErrorCodes.USER_BLOCKED);
     const existInformation = await this.userRepository.selectByWhere(
       {
         where: [
@@ -76,7 +74,7 @@ export class UserService implements IUserService {
         ]
       }
     );
-    if (existInformation) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
+    if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
     const userToUpdate: UserEntity = {
       ...user.name && { name: user.name },
       ...user.adress && { adress: user.adress },
@@ -84,7 +82,7 @@ export class UserService implements IUserService {
       ...user.email && { email: user.email },
       ...user.password && { password: await hash(user.password, 10) },
       ...user.profileType !== existUser.profileType ? { profileType: user.profileType } : null,
-      updatedBy: actor.id ? actor.id : 'SYSTEM',
+      updatedBy: 'SYSTEM',
     }
     await this.userRepository.updateById(user.id as string, userToUpdate);
     const updatedUser = await this.userRepository.selectById(existUser.id);
@@ -92,13 +90,11 @@ export class UserService implements IUserService {
   }
 
   async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
-    const { actor } = additionalInformation;
     const existUser = await this.userRepository.selectById(id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
-    if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN)) throw new BusinessError(ErrorCodes.USER_BLOCKED);
     await this.userRepository.updateById(id, {
       deletedAt: new Date(),
-      deletedBy: actor.id ? actor.id : 'SYSTEM',
+      deletedBy: 'SYSTEM',
     });
     await this.userRepository.deleteById(id);
     return true;

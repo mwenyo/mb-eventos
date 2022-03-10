@@ -5,6 +5,8 @@ import compress from 'compression';
 import helmet from 'helmet';
 import { v4 } from 'uuid';
 
+import './controllers';
+
 import TYPES from './utilities/types';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import express, { NextFunction, Request, Response } from 'express';
