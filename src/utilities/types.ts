@@ -1,6 +1,8 @@
 const TYPES = {
   UserRepository: 'UserRepository',
-  UserService: 'UserService'
+  UserService: 'UserService',
+
+  UserCredentialService: 'UserCredentialService'
 };
 
 export default TYPES;
