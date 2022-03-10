@@ -17,6 +17,8 @@ import { IUserService } from './services/interfaces/user';
 import { UserService } from './services/user';
 import { UserRepository } from './db/repositories/user';
 import { IUserRepository } from './db/repositories/interfaces/user';
+import { IUserCredentialService } from './services/interfaces/user-credential';
+import { UserCredentialService } from './services/user-credential';
 
 const container: Container = new Container();
 
@@ -67,6 +69,9 @@ export class Server {
       .bind<IUserService>(TYPES.UserService).to(UserService);
     container
       .bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+    container
+      .bind<IUserCredentialService>(TYPES.UserCredentialService)
+      .to(UserCredentialService);
   }
 
   createServer(): void {

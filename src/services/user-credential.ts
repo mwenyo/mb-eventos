@@ -1,20 +1,17 @@
 import { inject, injectable } from 'inversify';
 
-import TYPES from '../utilities/types';
 import BusinessError, { ErrorCodes } from '../utilities/errors/business';
+import TYPES from '../utilities/types';
 
 import { ConstantsEnv } from '../constants';
 
 import { IUserCredentialService } from './interfaces/user-credential';
 
-import { compare, hash } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { JwtPayload, sign, verify, VerifyErrors } from 'jsonwebtoken'
 
 import { IAccessTokenAndRefreshToken } from '../models/user-credential';
-import { IUserRepository } from 'db/repositories/interfaces/user';
-import { AdditionalInformation } from '../models/user';
-import { userMapToDTO } from '../models/mappers/user';
-import UserEntity from '../db/entities/user';
+import { IUserRepository } from '../db/repositories/interfaces/user';
 
 @injectable()
 export class UserCredentialService implements IUserCredentialService {
@@ -28,19 +25,25 @@ export class UserCredentialService implements IUserCredentialService {
 
   async authenticate(email: string, password: string): Promise<IAccessTokenAndRefreshToken> {
     let response: IAccessTokenAndRefreshToken = null;
+
     const existUser = await this.userRepository.selectOneByOptions({ where: { email } });
-    if (!existUser || !await compare(password, existUser.password)) {
-      throw new BusinessError(ErrorCodes.INVALID_CREDENTIALS);
-    }
+
+    const passwordComparison = await compare(password, existUser.password)
+
+    if (!existUser || !passwordComparison) throw new BusinessError(ErrorCodes.INVALID_CREDENTIALS);
+
     const accessToken = sign({}, ConstantsEnv.auth.accessTokenSecret, {
       subject: existUser.id,
       expiresIn: ConstantsEnv.auth.accessTokenExpiration
     })
+
     const refreshToken = sign({}, ConstantsEnv.auth.refreshTokenSecret, {
       subject: existUser.id,
       expiresIn: ConstantsEnv.auth.refreshTokenExpiration
     })
+
     response = { accessToken, refreshToken };
+
     return response;
   }
 
