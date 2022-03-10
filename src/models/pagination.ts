@@ -9,3 +9,9 @@ export interface ISearchParameterBase {
   isDESC: boolean;
   limit: number;
 }
+
+export interface ISearchParameterUser extends ISearchParameterBase {
+  name: string | null;
+  email: string | null;
+  profileType: string[] | null;
+}

@@ -5,12 +5,18 @@ import compress from 'compression';
 import helmet from 'helmet';
 import { v4 } from 'uuid';
 
+import './controllers';
+
 import TYPES from './utilities/types';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import express, { NextFunction, Request, Response } from 'express';
 import { ConstantsEnv } from './constants';
 import LoggerManager from './utilities/logger-manager';
 import cookieParser from 'cookie-parser';
+import { IUserService } from './services/interfaces/user';
+import { UserService } from './services/user';
+import { UserRepository } from './db/repositories/user';
+import { IUserRepository } from './db/repositories/interfaces/user';
 
 const container: Container = new Container();
 
@@ -57,7 +63,10 @@ export class Server {
   }
 
   configDependencies(): void {
-
+    container
+      .bind<IUserService>(TYPES.UserService).to(UserService);
+    container
+      .bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
   }
 
   createServer(): void {
