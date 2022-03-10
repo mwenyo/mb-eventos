@@ -11,6 +11,13 @@ export class Constants {
   timezone: string;
   language: string;
 
+  auth: {
+    accessTokenSecret: string,
+    refreshTokenSecret: string,
+    accessTokenExpiration: string,
+    refreshTokenExpiration: string
+  }
+
   database: {
     hostWrite: string,
     name: string,
@@ -28,6 +35,13 @@ export class Constants {
 
     this.timezone = process.env.TIMEZONE;
     this.language = process.env.LANGUAGE;
+
+    this.auth = {
+      accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
+      refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
+      accessTokenExpiration: process.env.ACCESS_TOKEN_EXPIRATION,
+      refreshTokenExpiration: process.env.REFRESH_TOKEN_EXPIRATION
+    }
 
     this.database = {
       hostWrite: process.env.DATABASE_HOST,
