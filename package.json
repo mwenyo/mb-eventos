@@ -1,0 +1,36 @@
+{
+  "name": "mb-eventos",
+  "version": "1.0.0",
+  "description": "O projeto consiste em uma aplicação para criação e gerenciamento de eventos empresariais e educacionais. A demanda pela aplicação se dá pela necessidade de fazer controle de compra de ingressos para os eventos criados por empresas e universidades.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwenyo/mb-eventos.git"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mwenyo/mb-eventos/issues"
+  },
+  "homepage": "https://github.com/mwenyo/mb-eventos#readme",
+  "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "typescript": "^4.6.2",
+    "yarn": "^1.22.17"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^16.2.1",
+    "@commitlint/config-conventional": "^16.2.1",
+    "@types/node": "^17.0.21",
+    "husky": "^7.0.4",
+    "ts-node": "^10.7.0",
+    "ts-node-dev": "^1.1.8"
+  }
+}
