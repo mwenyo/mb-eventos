@@ -55,8 +55,12 @@ export class EventService implements IEventService {
     return response;
   }
 
-  async updateById(id: string, event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
+  async updateById(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
     const { actor } = additionalInformation;
+
+    const existEvent = await this.getById(event.id)
+
+    if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
 
     const eventToUpdate = {
       ...event.name && { event: event.name },
@@ -67,8 +71,8 @@ export class EventService implements IEventService {
       updatedBy: (actor && actor.id) || 'SYSTEM',
     };
 
-    await this.eventRepository.updateById(id, eventToUpdate)
-    const response = await this.getById(id);
+    await this.eventRepository.updateById(event.id, eventToUpdate)
+    const response = await this.getById(event.id);
     return eventMapToDTO(response);
   }
 

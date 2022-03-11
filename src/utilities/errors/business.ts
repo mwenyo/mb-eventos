@@ -36,5 +36,7 @@ export enum ValidationErrorCodes {
   PASSWORDS_DONT_MATCH = 'Senha e confirmação de senha não conferem',
   INVALID_CPF = 'Formato inválido para CPF',
   INVALID_CNPJ = 'Formato inválido para CNPJ',
-  INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ'
+  INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ',
+  INVALID_DATETIME = 'Data/Hora em formato incorreto',
+  INVALID_TICKET_QNT = 'Quantidade de ingressos deve ser maior do que 0'
 }

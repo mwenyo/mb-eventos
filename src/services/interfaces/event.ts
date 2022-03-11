@@ -8,7 +8,7 @@ export interface IEventService {
   getById(id: string): Promise<EventDTO>;
   getWithPagination(searchParameter: ISearchParameterBase):
     Promise<Pagination<EventDTO>>;
-  updateById(id: string, event: EventEntity, additionalInformation: AdditionalInformation):
+  updateById(event: EventEntity, additionalInformation: AdditionalInformation):
     Promise<EventDTO>;
   deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean>;
 }
