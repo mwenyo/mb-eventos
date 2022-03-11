@@ -4,7 +4,7 @@ export interface UserDTO {
   id?: string;
   name?: string;
   cpfCnpj?: string;
-  adress?: string;
+  address?: string;
   email?: string;
   password?: string;
   profileType?: number;
@@ -12,5 +12,4 @@ export interface UserDTO {
 
 export interface AdditionalInformation {
   actor?: UserEntity;
-  token?: string;
 }

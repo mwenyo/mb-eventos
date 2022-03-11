@@ -27,10 +27,11 @@ export class UserCredentialService implements IUserCredentialService {
     let response: IAccessTokenAndRefreshToken = null;
 
     const existUser = await this.userRepository.selectOneByOptions({ where: { email } });
+    if (!existUser) throw new BusinessError(ErrorCodes.INVALID_CREDENTIALS);
 
     const passwordComparison = await compare(password, existUser.password)
+    if (!passwordComparison) throw new BusinessError(ErrorCodes.INVALID_CREDENTIALS);
 
-    if (!existUser || !passwordComparison) throw new BusinessError(ErrorCodes.INVALID_CREDENTIALS);
 
     const accessToken = sign({}, ConstantsEnv.auth.accessTokenSecret, {
       subject: existUser.id,

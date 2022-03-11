@@ -8,6 +8,7 @@ import {
   controller,
   httpDelete,
 } from 'inversify-express-utils';
+import { Response } from 'express';
 
 import { IUserService } from '../../services/interfaces/user';
 import TYPES from '../../utilities/types';
@@ -17,6 +18,8 @@ import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { ICustomRequest } from '../../models/custom-request';
 import { AdditionalInformation } from '../../models/user';
 import { userMapToEntity } from '../../models/mappers/user';
+import { ErrorCodes } from '../../utilities/errors/business'
+import authenticate from '../middlewares/authenticate'
 
 @controller('/user')
 export class UserController extends BaseHttpController implements interfaces.Controller {
@@ -29,25 +32,23 @@ export class UserController extends BaseHttpController implements interfaces.Con
   }
 
   @httpPost('/')
-  private async create(req: ICustomRequest): Promise<any> {
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
+  private async create(req: ICustomRequest, res: Response): Promise<any> {
+    if (req.user) return res.send(403).send(ErrorCodes.USER_BLOCKED)
 
-    return await this.userService.create(userMapToEntity(req.body), additionalInformation);
+    return await this.userService.create(userMapToEntity(req.body));
   }
 
-  @httpGet('/me')
+  @httpGet('/me', authenticate)
   private getMe(req: ICustomRequest): Promise<any> {
     return this.userService.getById(req.user.id);
   }
 
-  @httpGet('/:id')
+  @httpGet('/:id', authenticate)
   private getById(req: ICustomRequest): Promise<any> {
     return this.userService.getById(req.params.id);
   }
 
-  @httpGet('/')
+  @httpGet('/', authenticate)
   private getWithPagination(req: ICustomRequest): Promise<Pagination<UserEntity>> {
     const searchParameter: ISearchParameterUser = {
       ...req.query && req.query.name && {
@@ -64,7 +65,7 @@ export class UserController extends BaseHttpController implements interfaces.Con
     return this.userService.getWithPagination(searchParameter);
   }
 
-  @httpPut('/:id')
+  @httpPut('/:id', authenticate)
   private updateById(req: ICustomRequest): Promise<any> {
     const user = userMapToEntity(req.body);
     user.id = req.params.id;
@@ -74,7 +75,7 @@ export class UserController extends BaseHttpController implements interfaces.Con
     return this.userService.updateById(user, additionalInformation);
   }
 
-  @httpDelete('/:id')
+  @httpDelete('/:id', authenticate)
   private deleteById(req: ICustomRequest): Promise<any> {
     const additionalInformation: AdditionalInformation = {
       actor: req.user,
