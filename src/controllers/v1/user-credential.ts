@@ -4,11 +4,15 @@ import {
   BaseHttpController,
   interfaces,
   controller,
+  httpGet,
 } from 'inversify-express-utils';
 
-import { Response } from 'express';
-import httpStatus from 'http-status';
+import { Request, Response } from 'express';
+//import httpStatus from 'http-status';
 import { check, cookie, validationResult } from 'express-validator';
+import * as httpStatus from 'http-status';
+
+
 
 import TYPES from '../../utilities/types';
 
@@ -66,5 +70,24 @@ export class UserCredentialController extends BaseHttpController implements inte
     const refreshToken = cookies.token.toString()
     const token = await this.userCredentialService.refeshToken(refreshToken)
     return res.status(200).json({ token })
+  }
+
+  @httpGet('/logout',
+    cookie('token').isJWT().withMessage(ValidationErrorCodes.INVALID_TOKEN)
+  )
+  private async logout(req: Request, res: Response): Promise<any> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { cookies } = req
+    if (!cookies?.token) return res.sendStatus(httpStatus.UNAUTHORIZED)
+    res.clearCookie('token', {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: false
+    })
+    return res.sendStatus(204)
   }
 }
