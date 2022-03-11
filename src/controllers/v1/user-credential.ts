@@ -8,12 +8,14 @@ import {
 
 import { Response } from 'express';
 import httpStatus from 'http-status';
+import { check, cookie, validationResult } from 'express-validator';
 
 import TYPES from '../../utilities/types';
 
 import { IUserCredentialService } from '../../services/interfaces/user-credential';
 import { ICustomRequest } from '../../models/custom-request';
 import { IAccessTokenAndRefreshToken } from '../../models/user-credential';
+import { ValidationErrorCodes } from '../../utilities/errors/business';
 
 @controller('/user-credential')
 export class UserCredentialController extends BaseHttpController implements interfaces.Controller {
@@ -24,8 +26,19 @@ export class UserCredentialController extends BaseHttpController implements inte
     super();
   }
 
-  @httpPost('/auth')
+  @httpPost('/auth',
+    check('email')
+      .isEmail()
+      .withMessage(ValidationErrorCodes.INVALID_EMAIL),
+    check('password')
+      .isLength({ min: 8 })
+      .withMessage(ValidationErrorCodes.PASSWORD_MIN_LENGTH)
+  )
   private async auth(req: ICustomRequest, res: Response): Promise<any> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const tokens: IAccessTokenAndRefreshToken = await this.userCredentialService
       .authenticate(
         req.body.email as string,
@@ -40,8 +53,14 @@ export class UserCredentialController extends BaseHttpController implements inte
     return res.status(200).json({ token: tokens.accessToken })
   }
 
-  @httpPost('/refresh')
+  @httpPost('/refresh',
+    cookie('token').isJWT().withMessage(ValidationErrorCodes.INVALID_TOKEN)
+  )
   private async refresh(req: ICustomRequest, res: Response): Promise<any> {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const { cookies } = req
     if (!cookies?.token) return res.sendStatus(httpStatus.UNAUTHORIZED)
     const refreshToken = cookies.token.toString()
