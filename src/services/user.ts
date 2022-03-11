@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Not } from 'typeorm';
 
 import TYPES from '../utilities/types';
-import BusinessError, { ErrorCodes } from '../utilities/errors/business';
+import BusinessError, { ErrorCodes, ValidationErrorCodes } from '../utilities/errors/business';
 
 import UserEntity from '../db/entities/user';
 import { IUserRepository } from '../db/repositories/interfaces/user';
@@ -14,6 +14,7 @@ import { AdditionalInformation, UserDTO } from '../models/user';
 import ProfileType from '../enumerators/profile-type';
 import { userMapToDTO } from '../models/mappers/user';
 import { hash } from 'bcrypt';
+import { cnpj, cpf } from 'cpf-cnpj-validator';
 
 @injectable()
 export class UserService implements IUserService {
@@ -77,12 +78,19 @@ export class UserService implements IUserService {
       }
     );
     if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
+    if (user.cpfCpnj) {
+      if (existUser.profileType === ProfileType.PARTICIPANT && !cpf.isValid(user.cpfCpnj)) {
+        throw new BusinessError(ValidationErrorCodes.INVALID_CPF);
+      }
+      if (existUser.profileType === ProfileType.PROMOTER && !cnpj.isValid(user.cpfCpnj)) {
+        throw new BusinessError(ValidationErrorCodes.INVALID_CNPJ);
+      }
+    }
     const userToUpdate: UserEntity = {
       ...user.name && { name: user.name },
       ...user.address && { address: user.address },
       ...user.cpfCpnj && { cpfCpnj: user.cpfCpnj },
       ...user.email && { email: user.email },
-      ...user.password && { password: await hash(user.password, 10) },
       updatedBy: actor.id ? actor.id : 'SYSTEM',
     }
     await this.userRepository.updateById(user.id as string, userToUpdate);
