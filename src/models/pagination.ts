@@ -15,3 +15,8 @@ export interface ISearchParameterUser extends ISearchParameterBase {
   email: string | null;
   profileType: string[] | null;
 }
+
+export interface ISearchParameterEvent extends ISearchParameterBase {
+  name: string | null;
+  promoter: string | null;
+}
