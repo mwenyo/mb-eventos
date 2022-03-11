@@ -24,3 +24,16 @@ export enum ErrorCodes {
   USER_ALREADY_EXISTS = 'Usuário já existente',
   PROFILE_NOT_ALLOWED = 'Perfil não permitido',
 }
+
+export enum ValidationErrorCodes {
+  REQUIRED_FIELD = 'Campo obrigatório',
+  PASSWORD_MIN_LENGTH = 'A senha deve conter no mínimo 8 caracteres',
+  PASSWORD_CONFIRMATION_MIN_LENGTH = 'A confirmação da senha deve conter no mínimo 8 caracteres',
+  INVALID_UUID = 'UUID Inválido',
+  INVALID_PROFILE_TYPE = 'Perfil de usuário inválido',
+  INVALID_EMAIL = 'Formato de email inválido',
+  PASSWORDS_DONT_MATCH = 'Senha e confirmação de senha não conferem',
+  INVALID_CPF = 'Formato inválido para CPF',
+  INVALID_CNPJ = 'Formato inválido para CNPJ',
+  INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ'
+}
