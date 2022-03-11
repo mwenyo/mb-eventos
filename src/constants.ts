@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config({
-  path: __dirname + '/../.env.development',
+  path: __dirname + '/../.env',
 });
 export class Constants {
   env: 'production' | 'development';

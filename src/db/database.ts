@@ -20,6 +20,6 @@ export async function initializeDatabase(): Promise<void> {
 
     migrationsRun: true,
   }).then(() => {
-    console.log('📦 Database connected!')
+    console.log('\n📦 Database connected!')
   });
 }

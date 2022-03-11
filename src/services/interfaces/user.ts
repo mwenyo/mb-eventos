@@ -3,7 +3,7 @@ import UserEntity from '../../db/entities/user';
 import { AdditionalInformation, UserDTO } from '../../models/user';
 
 export interface IUserService {
-  create(user: UserEntity, additionalInformation: AdditionalInformation): Promise<UserDTO>;
+  create(user: UserEntity): Promise<UserDTO>;
   getById(id: string): Promise<UserDTO>;
   getWithPagination(searchParameter: ISearchParameterBase):
     Promise<Pagination<UserDTO>>;

@@ -22,7 +22,7 @@ export class CreateUserTable1646939566842 implements MigrationInterface {
             type: 'varchar',
             isNullable: true
           }, {
-            name: 'adress',
+            name: 'address',
             type: 'varchar',
             isNullable: true
           }, {

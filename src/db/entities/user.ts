@@ -14,7 +14,7 @@ export default class UserEntity extends Base {
   public cpfCpnj?: string;
 
   @Column()
-  public adress?: string;
+  public address?: string;
 
   @Column({ type: 'int4' })
   public profileType?: number;

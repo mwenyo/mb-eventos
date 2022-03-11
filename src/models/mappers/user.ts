@@ -5,7 +5,7 @@ export function userMapToEntity(user: UserDTO): UserEntity {
   return {
     name: user.name,
     cpfCpnj: user.cpfCnpj,
-    adress: user.adress,
+    address: user.address,
     email: user.email,
     password: user.password,
     profileType: user.profileType,
@@ -17,7 +17,7 @@ export function userMapToDTO(user: UserEntity): UserDTO {
     id: user.id,
     name: user.name,
     cpfCnpj: user.cpfCpnj,
-    adress: user.adress,
+    address: user.address,
     email: user.email,
     profileType: user.profileType,
   };

@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Not } from 'typeorm';
 
 import TYPES from '../utilities/types';
-import BusinessError, { ErrorCodes } from '../utilities/errors/business';
+import BusinessError, { ErrorCodes, ValidationErrorCodes } from '../utilities/errors/business';
 
 import UserEntity from '../db/entities/user';
 import { IUserRepository } from '../db/repositories/interfaces/user';
@@ -14,6 +14,7 @@ import { AdditionalInformation, UserDTO } from '../models/user';
 import ProfileType from '../enumerators/profile-type';
 import { userMapToDTO } from '../models/mappers/user';
 import { hash } from 'bcrypt';
+import { cnpj, cpf } from 'cpf-cnpj-validator';
 
 @injectable()
 export class UserService implements IUserService {
@@ -28,15 +29,15 @@ export class UserService implements IUserService {
   async getById(id: string): Promise<UserDTO> {
     const user: UserEntity = await this.userRepository.selectById(id);
     if (!user) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
-    return userMapToDTO(user as UserEntity);
+    return userMapToDTO(user);
   }
 
   async create(newUser: UserEntity): Promise<UserDTO> {
     const existInformation = await this.userRepository.selectByWhere(
       {
         where: [
-          { email: newUser.email, id: Not(newUser.id) },
-          { cpfCpnj: newUser.cpfCpnj, id: Not(newUser.id) },
+          { email: newUser.email },
+          { cpfCpnj: newUser.cpfCpnj },
         ]
       }
     );
@@ -58,8 +59,10 @@ export class UserService implements IUserService {
   }
 
   async updateById(user: UserEntity, additionalInformation: AdditionalInformation): Promise<UserDTO> {
+    const { actor } = additionalInformation;
     const existUser = await this.userRepository.selectById(user.id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
+    if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN)) throw new BusinessError(ErrorCodes.USER_BLOCKED);
     const existInformation = await this.userRepository.selectByWhere(
       {
         where: [
@@ -75,14 +78,20 @@ export class UserService implements IUserService {
       }
     );
     if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
+    if (user.cpfCpnj) {
+      if (existUser.profileType === ProfileType.PARTICIPANT && !cpf.isValid(user.cpfCpnj)) {
+        throw new BusinessError(ValidationErrorCodes.INVALID_CPF);
+      }
+      if (existUser.profileType === ProfileType.PROMOTER && !cnpj.isValid(user.cpfCpnj)) {
+        throw new BusinessError(ValidationErrorCodes.INVALID_CNPJ);
+      }
+    }
     const userToUpdate: UserEntity = {
       ...user.name && { name: user.name },
-      ...user.adress && { adress: user.adress },
+      ...user.address && { address: user.address },
       ...user.cpfCpnj && { cpfCpnj: user.cpfCpnj },
       ...user.email && { email: user.email },
-      ...user.password && { password: await hash(user.password, 10) },
-      ...user.profileType !== existUser.profileType ? { profileType: user.profileType } : null,
-      updatedBy: 'SYSTEM',
+      updatedBy: actor.id ? actor.id : 'SYSTEM',
     }
     await this.userRepository.updateById(user.id as string, userToUpdate);
     const updatedUser = await this.userRepository.selectById(existUser.id);
@@ -90,12 +99,14 @@ export class UserService implements IUserService {
   }
 
   async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
+    const { actor } = additionalInformation;
     const existUser = await this.userRepository.selectById(id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
-    await this.userRepository.updateById(id, {
-      deletedAt: new Date(),
-      deletedBy: 'SYSTEM',
-    });
+    if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN))
+      await this.userRepository.updateById(id, {
+        deletedAt: new Date(),
+        deletedBy: actor.id ? actor.id : 'SYSTEM',
+      });
     await this.userRepository.deleteById(id);
     return true;
   }
