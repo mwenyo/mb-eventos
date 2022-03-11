@@ -162,6 +162,9 @@ export class UserController extends BaseHttpController implements interfaces.Con
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    if (Object.keys(req.body).length === 0) {
+      return res.sendStatus(204)
+    }
     const user = userMapToEntity(req.body);
     user.id = req.params.id;
     const additionalInformation: AdditionalInformation = {
