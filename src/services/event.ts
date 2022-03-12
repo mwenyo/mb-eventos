@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 
 import TYPES from '../utilities/types';
 import BusinessError, { ErrorCodes } from '../utilities/errors/business';
+import { ILike } from 'typeorm';
 
 import EventEntity from '../db/entities/event';
 import { IEventRepository } from '../db/repositories/interfaces/event';
@@ -11,6 +12,8 @@ import { EventDTO } from '../models/event';
 import { Pagination, ISearchParameterEvent } from '../models/pagination';
 import { AdditionalInformation } from '../models/user';
 import { eventMapToDTO } from '../models/mappers/event';
+import EventStatus from '../enumerators/event-status';
+import { errorMonitor } from 'events';
 
 @injectable()
 export class EventService implements IEventService {
@@ -32,6 +35,15 @@ export class EventService implements IEventService {
   async create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO> {
 
     const { actor } = additionalInformation
+
+    const existEvent = await this.eventRepository.selectByWhere({
+      where: {
+        name: ILike(`${event.name}`),
+        status: EventStatus.FORSALE
+      }
+    })
+
+    if (existEvent.length !== 0) throw new BusinessError(ErrorCodes.EVENT_ALREADY_EXISTS)
 
     const eventToSave = {
       promoter: actor,
@@ -61,6 +73,15 @@ export class EventService implements IEventService {
     const existEvent = await this.getById(event.id)
 
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
+
+    const existEvents = await this.eventRepository.selectByWhere({
+      where: {
+        name: ILike(`${event.name}`),
+        status: EventStatus.FORSALE
+      }
+    })
+
+    if (existEvents.length !== 0) throw new BusinessError(ErrorCodes.EVENT_ALREADY_EXISTS)
 
     const eventToUpdate = {
       ...event.name && { event: event.name },
