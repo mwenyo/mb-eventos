@@ -36,7 +36,7 @@ export class UserRepository implements IUserRepository {
       );
       where = newWhere;
     }
-    let [rows, count] = await this.userRepository.findAndCount({
+    const [rows, count] = await this.userRepository.findAndCount({
       where,
       skip: searchParameter.offset,
       take: searchParameter.limit,
@@ -45,11 +45,11 @@ export class UserRepository implements IUserRepository {
       },
     });
 
-    rows = rows.map(row => userMapToDTO(row));
+    const rowsMapped = rows.map(row => userMapToDTO(row));
 
     return {
       count,
-      rows,
+      rows: rowsMapped,
     };
   }
 

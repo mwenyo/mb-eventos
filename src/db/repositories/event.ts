@@ -8,6 +8,7 @@ import {
 import EventEntity from '../entities/event';
 import { Pagination, ISearchParameterEvent } from '../../models/pagination';
 import { IEventRepository } from './interfaces/event';
+import { eventMapToDTO } from '../../models/mappers/event';
 
 @injectable()
 export class EventRepository implements IEventRepository {
@@ -33,9 +34,12 @@ export class EventRepository implements IEventRepository {
         [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
       },
     });
+
+    const rowsMapped = rows.map(row => eventMapToDTO(row))
+
     return {
       count,
-      rows,
+      rows: rowsMapped,
     };
   }
 
