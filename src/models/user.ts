@@ -1,4 +1,5 @@
 import UserEntity from '../db/entities/user';
+import { EventDTO } from './event';
 
 export interface UserDTO {
   id?: string;
@@ -8,6 +9,7 @@ export interface UserDTO {
   email?: string;
   password?: string;
   profileType?: number;
+  events?: EventDTO[];
 }
 
 export interface AdditionalInformation {

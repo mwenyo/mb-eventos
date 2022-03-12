@@ -9,6 +9,7 @@ import EventEntity from '../entities/event';
 import { Pagination, ISearchParameterEvent } from '../../models/pagination';
 import { IEventRepository } from './interfaces/event';
 import { eventMapToDTO } from '../../models/mappers/event';
+import { userMapToDTO } from '../../models/mappers/user';
 
 @injectable()
 export class EventRepository implements IEventRepository {
@@ -33,9 +34,13 @@ export class EventRepository implements IEventRepository {
       order: {
         [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
       },
+      relations: ['promoter']
     });
 
-    const rowsMapped = rows.map(row => eventMapToDTO(row))
+    const rowsMapped = rows.map(row => {
+      row.promoter = userMapToDTO(row.promoter)
+      return eventMapToDTO(row);
+    })
 
     return {
       count,

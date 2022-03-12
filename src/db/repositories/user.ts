@@ -9,6 +9,7 @@ import UserEntity from '../entities/user';
 import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { IUserRepository } from './interfaces/user';
 import { userMapToDTO } from '../../models/mappers/user';
+import { eventMapToDTO } from '../../models/mappers/event';
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -43,9 +44,13 @@ export class UserRepository implements IUserRepository {
       order: {
         [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
       },
+      relations: ['events']
     });
 
-    const rowsMapped = rows.map(row => userMapToDTO(row));
+    const rowsMapped = rows.map(row => {
+      row.events = row.events.map(event => eventMapToDTO(event))
+      return userMapToDTO(row)
+    });
 
     return {
       count,
