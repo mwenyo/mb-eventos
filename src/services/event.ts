@@ -31,10 +31,10 @@ export class EventService implements IEventService {
 
   async create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO> {
 
-    const actor = additionalInformation.actor
+    const { actor } = additionalInformation
 
     const eventToSave = {
-      promoter: event.promoter,
+      promoter: actor,
       name: event.name,
       address: event.address,
       date: event.date,

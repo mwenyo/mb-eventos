@@ -8,6 +8,7 @@ import {
 import UserEntity from '../entities/user';
 import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { IUserRepository } from './interfaces/user';
+import { userMapToDTO } from '../../models/mappers/user';
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -35,7 +36,7 @@ export class UserRepository implements IUserRepository {
       );
       where = newWhere;
     }
-    const [rows, count] = await this.userRepository.findAndCount({
+    let [rows, count] = await this.userRepository.findAndCount({
       where,
       skip: searchParameter.offset,
       take: searchParameter.limit,
@@ -43,6 +44,9 @@ export class UserRepository implements IUserRepository {
         [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
       },
     });
+
+    rows = rows.map(row => userMapToDTO(row));
+
     return {
       count,
       rows,

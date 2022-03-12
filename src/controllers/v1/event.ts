@@ -40,9 +40,6 @@ export class EventController extends BaseHttpController implements interfaces.Co
     check('name')
       .exists({ checkFalsy: true, checkNull: true })
       .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
-    check('promoter')
-      .isUUID()
-      .withMessage(ValidationErrorCodes.INVALID_UUID),
     check('address')
       .exists({ checkFalsy: true, checkNull: true })
       .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
@@ -111,10 +108,6 @@ export class EventController extends BaseHttpController implements interfaces.Co
   @httpPut('/:id',
     authenticate,
     authorize([ProfileType.ADMIN, ProfileType.PROMOTER]),
-    check('promoter')
-      .optional({ checkFalsy: false })
-      .isUUID()
-      .withMessage(ValidationErrorCodes.INVALID_UUID),
     check('date')
       .optional({ checkFalsy: false })
       .isDate()
