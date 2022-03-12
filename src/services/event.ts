@@ -68,6 +68,7 @@ export class EventService implements IEventService {
       ...event.date && { event: event.date },
       ...event.tickets && { event: event.tickets },
       ...event.limitByParticipant && { event: event.limitByParticipant },
+      ...event.status && { event: event.status },
       updatedBy: (actor && actor.id) || 'SYSTEM',
     };
 

@@ -9,6 +9,7 @@ export function eventMapToEntity(event: EventDTO): EventEntity {
     tickets: event.tickets,
     date: event.date,
     limitByParticipant: event.limitByParticipant,
+    status: event.status
   };
 }
 
@@ -21,5 +22,6 @@ export function eventMapToDTO(event: EventEntity): EventDTO {
     tickets: event.tickets,
     date: event.date,
     limitByParticipant: event.limitByParticipant,
+    status: event.status
   };
 }

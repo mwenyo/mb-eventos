@@ -8,4 +8,5 @@ export interface EventDTO {
   date?: Date;
   tickets?: number;
   limitByParticipant?: boolean;
+  status?: number;
 }

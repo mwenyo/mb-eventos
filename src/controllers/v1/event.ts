@@ -23,6 +23,7 @@ import { ICustomRequest } from '../../models/custom-request';
 import { AdditionalInformation } from '../../models/user';
 import { eventMapToEntity } from '../../models/mappers/event';
 import ProfileType from '../../enumerators/profile-type';
+import EventStatus from '../../enumerators/event-status';
 
 @controller('/event')
 export class EventController extends BaseHttpController implements interfaces.Controller {
@@ -119,6 +120,10 @@ export class EventController extends BaseHttpController implements interfaces.Co
     check('limitByParticipant')
       .optional({ checkFalsy: false })
       .isBoolean()
+      .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
+    check('status')
+      .optional({ checkFalsy: false })
+      .isIn([EventStatus.CANCELLED, EventStatus.CLOSED, EventStatus.FORSALE])
       .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
   )
   private async updateById(req: ICustomRequest, res: Response): Promise<any> {

@@ -28,4 +28,7 @@ export default class EventEntity extends Base {
 
   @Column()
   public limitByParticipant?: boolean;
+
+  @Column()
+  public status?: number;
 }
