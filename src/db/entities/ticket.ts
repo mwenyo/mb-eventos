@@ -9,7 +9,7 @@ import Base from './base';
 import EventEntity from './event';
 import UserEntity from './user';
 
-@Entity('event')
+@Entity('ticket')
 export default class TicktEntity extends Base {
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'participantId' })
