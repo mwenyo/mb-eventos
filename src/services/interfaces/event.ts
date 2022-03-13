@@ -6,7 +6,7 @@ import { EventDTO } from '../../models/event';
 export interface IEventService {
   create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO>;
   getById(id: string): Promise<EventDTO>;
-  getWithPagination(searchParameter: ISearchParameterBase):
+  getWithPagination(searchParameter: ISearchParameterBase, samePromoter: boolean):
     Promise<Pagination<EventDTO>>;
   updateById(event: EventEntity, additionalInformation: AdditionalInformation):
     Promise<EventDTO>;

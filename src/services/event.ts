@@ -64,9 +64,15 @@ export class EventService implements IEventService {
     return eventMapToDTO(eventSaved);
   }
 
-  async getWithPagination(searchParameter: ISearchParameterEvent | null):
+  async getWithPagination(searchParameter: ISearchParameterEvent | null, samePromoter: boolean):
     Promise<Pagination<EventDTO> | null> {
     const response = await this.eventRepository.selectPagination(searchParameter);
+    if (samePromoter) {
+      response.rows = response.rows.map(row => {
+        delete (row.promoter);
+        return row;
+      });
+    }
     return response;
   }
 

@@ -88,6 +88,21 @@ export class EventController extends BaseHttpController implements interfaces.Co
     return await this.eventService.create(eventMapToEntity(req.body), additionalInformation);
   }
 
+  @httpGet('/myEvents',
+    authenticate,
+    authorize([ProfileType.ADMIN, ProfileType.PROMOTER])
+  )
+  private async myEvents(req: ICustomRequest, res: Response): Promise<Pagination<EventEntity> | any> {
+    const searchParameter: ISearchParameterEvent = {
+      ...req.query && req.query.name && {
+        name: req.query.name.toString(),
+      },
+      promoter: req.user.id,
+      ...controllerPaginationHelper(req),
+    };
+    return await this.eventService.getWithPagination(searchParameter, true);
+  }
+
   @httpGet(
     '/:id',
     authenticate,
@@ -124,7 +139,7 @@ export class EventController extends BaseHttpController implements interfaces.Co
       },
       ...controllerPaginationHelper(req),
     };
-    return await this.eventService.getWithPagination(searchParameter);
+    return await this.eventService.getWithPagination(searchParameter, false);
   }
 
   @httpPut('/:id',

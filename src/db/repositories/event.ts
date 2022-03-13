@@ -19,13 +19,14 @@ export class EventRepository implements IEventRepository {
     return this.eventRepository.save(event);
   }
 
+  // async selectPagination(searchParameter: ISearchParameterEvent, fields: (keyof EventEntity)[]): Promise<Pagination<EventEntity>> {
   async selectPagination(searchParameter: ISearchParameterEvent): Promise<Pagination<EventEntity>> {
     let where: any = { deletedAt: null };
     if (searchParameter.name) {
       where = { ...where, name: ILike(`%${searchParameter.name}%`) };
     }
     if (searchParameter.promoter) {
-      where = { ...where, email: ILike(`%${searchParameter.promoter}%`) };
+      where = { ...where, promoter: searchParameter.promoter };
     }
     const [rows, count] = await this.eventRepository.findAndCount({
       where,
@@ -34,7 +35,7 @@ export class EventRepository implements IEventRepository {
       order: {
         [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
       },
-      relations: ['promoter']
+      relations: ['promoter'],
     });
 
     const rowsMapped = rows.map(row => {
