@@ -24,6 +24,9 @@ export default class EventEntity extends Base {
   public ticketsSold?: number;
 
   @Column()
+  public ticketPrice?: number;
+
+  @Column()
   public address?: string;
 
   @Column()

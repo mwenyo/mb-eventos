@@ -36,6 +36,9 @@ export const eventCreateRouteValidation = [
   check('tickets')
     .isInt({ gt: 0 })
     .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
+  check('ticketPrice')
+    .isNumeric()
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE),
   check('limitByParticipant')
     .isBoolean()
     .withMessage(ValidationErrorCodes.REQUIRED_FIELD)
@@ -70,6 +73,10 @@ export const eventUpdateByIdRouteValidation = [
     .optional({ checkFalsy: false })
     .isInt({ gt: 0 })
     .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
+  check('ticketPrice')
+    .optional({ checkFalsy: false })
+    .isNumeric()
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE),
   check('limitByParticipant')
     .optional({ checkFalsy: false })
     .isBoolean()
