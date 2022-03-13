@@ -40,6 +40,7 @@ export enum ValidationErrorCodes {
   INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ',
   INVALID_DATETIME = 'Data/Hora em formato incorreto',
   INVALID_TICKET_QNT = 'A quantidade de ingressos inválida',
+  INVALID_TICKET_PRICE = 'Valor do ingresso inválido',
   END_DATE_GT_START_DATE = 'A data de encerramento não pode ser antes da data de abertura',
   DATE_IN_PAST = 'A data não pode ser antes de hoje'
 }
