@@ -20,5 +20,6 @@ export function userMapToDTO(user: UserEntity): UserDTO {
     address: user.address,
     email: user.email,
     profileType: user.profileType,
+    events: user.events,
   };
 }

@@ -4,21 +4,28 @@ import cors from 'cors';
 import compress from 'compression';
 import helmet from 'helmet';
 import { v4 } from 'uuid';
+import cookieParser from 'cookie-parser';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import express, { NextFunction, Request, Response } from 'express';
 
 import './controllers';
 
 import TYPES from './utilities/types';
-import { InversifyExpressServer } from 'inversify-express-utils';
-import express, { NextFunction, Request, Response } from 'express';
 import { ConstantsEnv } from './constants';
 import LoggerManager from './utilities/logger-manager';
-import cookieParser from 'cookie-parser';
+
 import { IUserService } from './services/interfaces/user';
 import { UserService } from './services/user';
 import { UserRepository } from './db/repositories/user';
 import { IUserRepository } from './db/repositories/interfaces/user';
+
 import { IUserCredentialService } from './services/interfaces/user-credential';
 import { UserCredentialService } from './services/user-credential';
+
+import { IEventService } from './services/interfaces/event';
+import { EventService } from './services/event';
+import { EventRepository } from './db/repositories/event';
+import { IEventRepository } from './db/repositories/interfaces/event';
 
 const container: Container = new Container();
 
@@ -69,6 +76,10 @@ export class Server {
       .bind<IUserService>(TYPES.UserService).to(UserService);
     container
       .bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+    container
+      .bind<IEventService>(TYPES.EventService).to(EventService);
+    container
+      .bind<IEventRepository>(TYPES.EventRepository).to(EventRepository);
     container
       .bind<IUserCredentialService>(TYPES.UserCredentialService)
       .to(UserCredentialService);

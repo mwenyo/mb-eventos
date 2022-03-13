@@ -22,6 +22,7 @@ export enum ErrorCodes {
   INVALID_CREDENTIALS = 'Email/senha inválidos',
   ENTITY_NOT_FOUND = 'Entidade não encontrada',
   USER_ALREADY_EXISTS = 'Usuário já existente',
+  EVENT_ALREADY_EXISTS = 'Já existe um evento em aberto com mesmo nome',
   PROFILE_NOT_ALLOWED = 'Perfil não permitido',
 }
 
@@ -36,5 +37,9 @@ export enum ValidationErrorCodes {
   PASSWORDS_DONT_MATCH = 'Senha e confirmação de senha não conferem',
   INVALID_CPF = 'Formato inválido para CPF',
   INVALID_CNPJ = 'Formato inválido para CNPJ',
-  INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ'
+  INVALID_CPF_OR_CNPJ = 'Formato inválido para CPF ou CNPJ',
+  INVALID_DATETIME = 'Data/Hora em formato incorreto',
+  INVALID_TICKET_QNT = 'A quantidade de ingressos inválida',
+  END_DATE_GT_START_DATE = 'A data de encerramento não pode ser antes da data de abertura',
+  DATE_IN_PAST = 'A data não pode ser antes de hoje'
 }

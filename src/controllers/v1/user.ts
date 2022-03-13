@@ -9,21 +9,31 @@ import {
   httpDelete,
 } from 'inversify-express-utils';
 import { Response } from 'express';
-import { check, param, validationResult } from 'express-validator'
-import { cpf, cnpj } from 'cpf-cnpj-validator';
 
-import BusinessError, { ErrorCodes, ValidationErrorCodes } from '../../utilities/errors/business'
+import TYPES from '../../utilities/types';
+import { ErrorCodes } from '../../utilities/errors/business'
+import { controllerPaginationHelper } from '../../utilities/utils';
+import ProfileType from '../../enumerators/profile-type';
+
 import authenticate from '../middlewares/authenticate'
 import authorize from '../middlewares/authorization';
-import TYPES from '../../utilities/types';
-import { IUserService } from '../../services/interfaces/user';
+
 import UserEntity from '../../db/entities/user';
-import { controllerPaginationHelper } from '../../utilities/utils';
+import { IUserService } from '../../services/interfaces/user';
+
 import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { ICustomRequest } from '../../models/custom-request';
 import { AdditionalInformation } from '../../models/user';
 import { userMapToEntity } from '../../models/mappers/user';
-import ProfileType from '../../enumerators/profile-type';
+
+import {
+  userCreateRouteValidation,
+  userDeleteByIdRouteValidation,
+  userGetByIdRouteValidation,
+  userGetWithPaginationRouteValidation,
+  userUpdateByIdRouteValidation
+} from 'controllers/validation/user';
+import { validationRoute } from 'controllers/validation/error';
 
 @controller('/user')
 export class UserController extends BaseHttpController implements interfaces.Controller {
@@ -36,47 +46,12 @@ export class UserController extends BaseHttpController implements interfaces.Con
   }
 
   @httpPost('/',
-    check('name').exists({ checkFalsy: true, checkNull: true }).withMessage(ValidationErrorCodes.REQUIRED_FIELD)
-    ,
-    check('email')
-      .isEmail()
-      .withMessage(ValidationErrorCodes.INVALID_EMAIL),
-    check('profileType')
-      .isIn([
-        ProfileType.PARTICIPANT,
-        ProfileType.PROMOTER
-      ])
-      .withMessage(ValidationErrorCodes.INVALID_PROFILE_TYPE),
-    check('password')
-      .isLength({ min: 8 })
-      .withMessage(ValidationErrorCodes.PASSWORD_MIN_LENGTH),
-    check('passwordConfirmation')
-      .isLength({ min: 8 })
-      .withMessage(ValidationErrorCodes.PASSWORD_CONFIRMATION_MIN_LENGTH)
-      .custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new BusinessError(ValidationErrorCodes.PASSWORDS_DONT_MATCH);
-        }
-        return true;
-      }),
-    check('cpfCnpj').custom((value, { req }) => {
-      if ((parseInt(req.body.profileType) === ProfileType.PARTICIPANT) && (!cpf.isValid(value))) {
-        throw new BusinessError(ValidationErrorCodes.INVALID_CPF);
-      }
-
-      if ((parseInt(req.body.profileType) === ProfileType.PROMOTER) && (!cnpj.isValid(value))) {
-        throw new BusinessError(ValidationErrorCodes.INVALID_CNPJ);
-      }
-      return true;
-    })
+    ...userCreateRouteValidation
   )
   private async create(req: ICustomRequest, res: Response): Promise<any> {
     if (req.cookies.token) return res.status(400).json({ error: ErrorCodes.USER_BLOCKED })
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validationRoute(req, res)
 
     return await this.userService.create(userMapToEntity(req.body));
   }
@@ -90,38 +65,20 @@ export class UserController extends BaseHttpController implements interfaces.Con
     '/:id',
     authenticate,
     authorize([ProfileType.ADMIN]),
-    param('id')
-      .isUUID()
-      .withMessage(ValidationErrorCodes.INVALID_UUID)
+    ...userGetByIdRouteValidation
   )
   private async getById(req: ICustomRequest, res: Response): Promise<any> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validationRoute(req, res)
     return await this.userService.getById(req.params.id);
   }
 
   @httpGet('/',
     authenticate,
     authorize([ProfileType.ADMIN]),
-    param('email')
-      .optional({ checkFalsy: false })
-      .isEmail()
-      .withMessage(ValidationErrorCodes.INVALID_EMAIL),
-    param('profileType')
-      .optional({ checkFalsy: false })
-      .isIn([
-        ProfileType.ADMIN,
-        ProfileType.PARTICIPANT,
-        ProfileType.PROMOTER
-      ])
+    ...userGetWithPaginationRouteValidation
   )
   private async getWithPagination(req: ICustomRequest, res: Response): Promise<Pagination<UserEntity> | any> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validationRoute(req, res)
     const searchParameter: ISearchParameterUser = {
       ...req.query && req.query.name && {
         name: req.query.name.toString(),
@@ -139,29 +96,10 @@ export class UserController extends BaseHttpController implements interfaces.Con
 
   @httpPut('/:id',
     authenticate,
-    param('id')
-      .isUUID()
-      .withMessage(ValidationErrorCodes.INVALID_UUID),
-    check('name')
-      .optional({ checkFalsy: false }),
-    check('email')
-      .optional({ checkFalsy: false })
-      .isEmail()
-      .withMessage(ValidationErrorCodes.INVALID_EMAIL),
-    check('cpfCnpj')
-      .optional({ checkFalsy: false })
-      .custom((value, { req }) => {
-        if ((!cnpj.isValid(value)) && (!cpf.isValid(value))) {
-          throw new BusinessError(ValidationErrorCodes.INVALID_CPF_OR_CNPJ);
-        }
-        return true;
-      }),
+    ...userUpdateByIdRouteValidation
   )
   private async updateById(req: ICustomRequest, res: Response): Promise<any> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validationRoute(req, res)
     if (Object.keys(req.body).length === 0) {
       return res.sendStatus(204)
     }
@@ -175,15 +113,10 @@ export class UserController extends BaseHttpController implements interfaces.Con
 
   @httpDelete('/:id',
     authenticate,
-    param('id')
-      .isUUID()
-      .withMessage(ValidationErrorCodes.INVALID_UUID)
+    ...userDeleteByIdRouteValidation
   )
   private async deleteById(req: ICustomRequest, res: Response): Promise<any> {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validationRoute(req, res)
     const additionalInformation: AdditionalInformation = {
       actor: req.user,
     }
