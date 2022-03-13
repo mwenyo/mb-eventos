@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 
 import TYPES from '../utilities/types';
-import BusinessError, { ErrorCodes } from '../utilities/errors/business';
+import BusinessError, { ErrorCodes, ValidationErrorCodes } from '../utilities/errors/business';
 import { ILike } from 'typeorm';
 
 import EventEntity from '../db/entities/event';
@@ -13,7 +13,7 @@ import { Pagination, ISearchParameterEvent } from '../models/pagination';
 import { AdditionalInformation } from '../models/user';
 import { eventMapToDTO } from '../models/mappers/event';
 import EventStatus from '../enumerators/event-status';
-import { errorMonitor } from 'events';
+import { userMapToDTO } from '../models/mappers/user';
 
 @injectable()
 export class EventService implements IEventService {
@@ -49,7 +49,9 @@ export class EventService implements IEventService {
       promoter: actor,
       name: event.name,
       address: event.address,
-      date: event.date,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
       tickets: event.tickets,
       limitByParticipant: event.limitByParticipant,
       createdBy: (actor && actor.id) || 'SYSTEM',
@@ -57,6 +59,7 @@ export class EventService implements IEventService {
     };
 
     const eventSaved = await this.eventRepository.create(eventToSave);
+    eventSaved.promoter = userMapToDTO(eventSaved.promoter)
 
     return eventMapToDTO(eventSaved);
   }
@@ -70,7 +73,7 @@ export class EventService implements IEventService {
   async updateById(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
     const { actor } = additionalInformation;
 
-    const existEvent = await this.getById(event.id)
+    const existEvent = await this.eventRepository.selectById(event.id)
 
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
 
@@ -83,10 +86,14 @@ export class EventService implements IEventService {
 
     if (existEvents.length !== 0) throw new BusinessError(ErrorCodes.EVENT_ALREADY_EXISTS)
 
+    if (existEvent.ticketsSold > event.tickets) throw new BusinessError(ValidationErrorCodes.INVALID_TICKET_QNT)
+
     const eventToUpdate = {
       ...event.name && { event: event.name },
       ...event.address && { event: event.address },
-      ...event.date && { event: event.date },
+      ...event.description && { event: event.description },
+      ...event.startDate && { event: event.startDate },
+      ...event.endDate && { event: event.endDate },
       ...event.tickets && { event: event.tickets },
       ...event.limitByParticipant && { event: event.limitByParticipant },
       ...event.status && { event: event.status },
@@ -95,6 +102,7 @@ export class EventService implements IEventService {
 
     await this.eventRepository.updateById(event.id, eventToUpdate)
     const response = await this.getById(event.id);
+    response.promoter = userMapToDTO(response.promoter)
     return eventMapToDTO(response);
   }
 

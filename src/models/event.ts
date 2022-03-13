@@ -5,7 +5,9 @@ export interface EventDTO {
   name?: string;
   promoter?: UserEntity;
   address?: string;
-  date?: Date;
+  description?: string;
+  startDate?: Date;
+  endDate?: Date;
   tickets?: number;
   limitByParticipant?: boolean;
   status?: number;

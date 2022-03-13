@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 import { check, param, validationResult } from 'express-validator'
 
-import { ValidationErrorCodes } from '../../utilities/errors/business'
+import BusinessError, { ValidationErrorCodes } from '../../utilities/errors/business'
 import authenticate from '../middlewares/authenticate'
 import authorize from '../middlewares/authorization';
 import TYPES from '../../utilities/types';
@@ -40,19 +40,40 @@ export class EventController extends BaseHttpController implements interfaces.Co
     authorize([ProfileType.PROMOTER]),
     check('name')
       .exists({ checkFalsy: true, checkNull: true })
+      .not()
+      .isEmpty()
       .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
     check('address')
       .exists({ checkFalsy: true, checkNull: true })
       .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
-    check('date')
-      .isDate()
-      .withMessage(ValidationErrorCodes.INVALID_DATETIME),
+    check('startDate')
+      .isISO8601()
+      .withMessage(ValidationErrorCodes.INVALID_DATETIME)
+      .custom(value => {
+        const startDate = new Date(value);
+        const todaysDate = new Date();
+        if (startDate <= todaysDate) {
+          throw new BusinessError(ValidationErrorCodes.DATE_IN_PAST);
+        }
+        return true;
+      }),
+    check('endDate')
+      .isISO8601()
+      .withMessage(ValidationErrorCodes.INVALID_DATETIME)
+      .custom((value, { req }) => {
+        const startDate = new Date(req.body.startDate);
+        const endDate = new Date(value);
+        if (startDate >= endDate) {
+          throw new BusinessError(ValidationErrorCodes.END_DATE_GT_START_DATE);
+        }
+        return true;
+      }),
     check('tickets')
       .isInt({ gt: 0 })
       .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
     check('limitByParticipant')
       .isBoolean()
-      .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
+      .withMessage(ValidationErrorCodes.REQUIRED_FIELD)
   )
   private async create(req: ICustomRequest, res: Response): Promise<any> {
     const errors = validationResult(req);

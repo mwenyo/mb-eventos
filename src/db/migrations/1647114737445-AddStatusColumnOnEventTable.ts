@@ -1,4 +1,5 @@
 import { Column, MigrationInterface, QueryRunner, TableColumn } from "typeorm";
+import EventStatus from "../../enumerators/event-status";
 
 export class AddStatusColumnOnEventTable1647114737445 implements MigrationInterface {
 
@@ -9,7 +10,7 @@ export class AddStatusColumnOnEventTable1647114737445 implements MigrationInterf
           name: 'status',
           type: 'integer',
           isNullable: false,
-          default: 1
+          default: EventStatus.FORSALE
         })
     )
   }

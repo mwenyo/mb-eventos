@@ -21,10 +21,19 @@ export default class EventEntity extends Base {
   public tickets?: number;
 
   @Column()
+  public ticketsSold?: number;
+
+  @Column()
   public address?: string;
 
   @Column()
-  public date?: Date;
+  public description?: string;
+
+  @Column()
+  public startDate?: Date;
+
+  @Column()
+  public endDate?: Date;
 
   @Column()
   public limitByParticipant?: boolean;
