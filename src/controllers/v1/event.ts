@@ -145,10 +145,30 @@ export class EventController extends BaseHttpController implements interfaces.Co
   @httpPut('/:id',
     authenticate,
     authorize([ProfileType.ADMIN, ProfileType.PROMOTER]),
-    check('date')
+    check('startDate')
       .optional({ checkFalsy: false })
-      .isDate()
-      .withMessage(ValidationErrorCodes.INVALID_DATETIME),
+      .isISO8601()
+      .withMessage(ValidationErrorCodes.INVALID_DATETIME)
+      .custom(value => {
+        const startDate = new Date(value);
+        const todaysDate = new Date();
+        if (startDate <= todaysDate) {
+          throw new BusinessError(ValidationErrorCodes.DATE_IN_PAST);
+        }
+        return true;
+      }),
+    check('endDate')
+      .optional({ checkFalsy: false })
+      .isISO8601()
+      .withMessage(ValidationErrorCodes.INVALID_DATETIME)
+      .custom((value, { req }) => {
+        const startDate = new Date(req.body.startDate);
+        const endDate = new Date(value);
+        if (startDate >= endDate) {
+          throw new BusinessError(ValidationErrorCodes.END_DATE_GT_START_DATE);
+        }
+        return true;
+      }),
     check('tickets')
       .optional({ checkFalsy: false })
       .isInt({ gt: 0 })
