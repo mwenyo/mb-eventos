@@ -9,7 +9,6 @@ import {
   httpDelete,
 } from 'inversify-express-utils';
 import { Response } from 'express';
-import { validationResult } from 'express-validator'
 
 import TYPES from '../../utilities/types';
 import { controllerPaginationHelper } from '../../utilities/utils';
@@ -33,7 +32,7 @@ import {
   eventUpdateByIdRouteValidation,
   eventDeleteByIdRouteValidation,
 } from '../validation/event';
-import { validationRoute } from '../validation/error';
+import { validationRoute } from '../../utilities/errors/validation';
 
 @controller('/event')
 export class EventController extends BaseHttpController implements interfaces.Controller {

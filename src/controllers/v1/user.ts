@@ -32,8 +32,8 @@ import {
   userGetByIdRouteValidation,
   userGetWithPaginationRouteValidation,
   userUpdateByIdRouteValidation
-} from 'controllers/validation/user';
-import { validationRoute } from 'controllers/validation/error';
+} from '../validation/user';
+import { validationRoute } from '../../utilities/errors/validation';
 
 @controller('/user')
 export class UserController extends BaseHttpController implements interfaces.Controller {
