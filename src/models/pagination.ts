@@ -20,3 +20,8 @@ export interface ISearchParameterEvent extends ISearchParameterBase {
   name: string | null;
   promoter: string | null;
 }
+
+export interface ISearchParameterTicket extends ISearchParameterBase {
+  participant: string | null;
+  event: string | null;
+}
