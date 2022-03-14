@@ -5,6 +5,9 @@ const TYPES = {
   EventRepository: 'EventRepository',
   EventService: 'EventService',
 
+  TicketRepository: 'TicketRepository',
+  TicketService: 'TicketService',
+
   UserCredentialService: 'UserCredentialService'
 };
 
