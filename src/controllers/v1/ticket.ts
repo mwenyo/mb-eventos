@@ -6,7 +6,6 @@ import {
   BaseHttpController,
   interfaces,
   controller,
-  httpDelete,
 } from 'inversify-express-utils';
 import { Response } from 'express';
 
@@ -21,7 +20,6 @@ import TicketEntity from '../../db/entities/ticket';
 import { ITicketService } from '../../services/interfaces/ticket';
 
 import { ICustomRequest } from '../../models/custom-request';
-import { ticketMapToEntity } from '../../models/mappers/ticket';
 import { AdditionalInformation } from '../../models/user';
 import { Pagination, ISearchParameterTicket } from '../../models/pagination';
 
@@ -30,11 +28,10 @@ import {
   ticketGetByIdRouteValidation,
   ticketGetWithPaginationRouteValidation,
   ticketUpdateByIdRouteValidation,
-  ticketDeleteByIdRouteValidation,
 } from '../validation/ticket';
 import { validationRoute } from '../../utilities/errors/validation';
 
-@controller('/ticket')
+@controller('/ticket', authenticate)
 export class TicketController extends BaseHttpController implements interfaces.Controller {
 
   constructor(
@@ -45,7 +42,6 @@ export class TicketController extends BaseHttpController implements interfaces.C
   }
 
   @httpPost('/',
-    authenticate,
     authorize([ProfileType.PARTICIPANT]),
     ...ticketCreateRouteValidation
   )
@@ -61,77 +57,56 @@ export class TicketController extends BaseHttpController implements interfaces.C
     );
   }
 
-  @httpGet('/myTickets',
-    authenticate,
-    authorize([ProfileType.ADMIN, ProfileType.PROMOTER])
-  )
-  private async myTickets(req: ICustomRequest, res: Response): Promise<Pagination<TicketEntity> | any> {
-    /* const searchParameter: ISearchParameterTicket = {
-      ...req.query && req.query.name && {
-        name: req.query.name.toString(),
-      },
-      promoter: req.user.id,
-      ...controllerPaginationHelper(req),
-    };
-    return await this.ticketService.getWithPagination(searchParameter, true); */
-  }
-
-  @httpGet(
-    '/:id',
-    authenticate,
-    ...ticketGetByIdRouteValidation
-  )
-  private async getById(req: ICustomRequest, res: Response): Promise<any> {
-    /* validationRoute(req, res)
-    return await this.ticketService.getById(req.params.id); */
-  }
-
   @httpGet('/',
-    authenticate,
     ...ticketGetWithPaginationRouteValidation
   )
   private async getWithPagination(req: ICustomRequest, res: Response): Promise<Pagination<TicketEntity> | any> {
-    /* validationRoute(req, res)
     const searchParameter: ISearchParameterTicket = {
-      ...req.query && req.query.name && {
-        name: req.query.name.toString(),
+      ...req.query && req.query.participant && {
+        participant: req.query.participant.toString(),
       },
       ...req.query && req.query.promoter && {
         promoter: req.query.promoter.toString(),
       },
+      ...req.query && req.query.event && {
+        event: req.query.event.toString(),
+      },
+      ...req.query && req.query.status && {
+        status: req.query.status.toString(),
+      },
       ...controllerPaginationHelper(req),
     };
-    return await this.ticketService.getWithPagination(searchParameter, false); */
+    const additionalInformation: AdditionalInformation = {
+      actor: req.user,
+    }
+    return await this.ticketService.getWithPagination(searchParameter, additionalInformation);
+  }
+
+  @httpGet(
+    '/:id',
+    ...ticketGetByIdRouteValidation
+  )
+  private async getById(req: ICustomRequest, res: Response): Promise<any> {
+    validationRoute(req, res)
+    const additionalInformation = {
+      actor: req.user
+    }
+    return await this.ticketService.getById(req.params.id, additionalInformation);
   }
 
   @httpPut('/:id',
-    authenticate,
-    authorize([ProfileType.ADMIN, ProfileType.PROMOTER]),
     ...ticketUpdateByIdRouteValidation
   )
   private async updateById(req: ICustomRequest, res: Response): Promise<any> {
-    /* validationRoute(req, res)
+    validationRoute(req, res)
     if (Object.keys(req.body).length === 0) {
-      return res.sendStatus(204)
+      return res.sendStatus(204);
     }
-    const ticket = ticketMapToEntity(req.body);
-    ticket.id = req.params.id;
+    const ticket = req.params.id;
+    const status = parseInt(req.body.status);
     const additionalInformation: AdditionalInformation = {
       actor: req.user,
     }
-    return await this.ticketService.updateById(ticket, additionalInformation); */
-  }
-
-  @httpDelete('/:id',
-    authenticate,
-    authorize([ProfileType.ADMIN, ProfileType.PROMOTER]),
-    ...ticketDeleteByIdRouteValidation
-  )
-  private async deleteById(req: ICustomRequest, res: Response): Promise<any> {
-    /* validationRoute(req, res)
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.ticketService.deleteById(req.params.id, additionalInformation); */
+    return await this.ticketService.updateById(ticket, status, additionalInformation);
   }
 }

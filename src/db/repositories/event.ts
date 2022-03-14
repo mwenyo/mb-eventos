@@ -55,6 +55,7 @@ export class EventRepository implements IEventRepository {
         id,
         ...options
       },
+      relations: ['promoter']
     })
   }
 

@@ -5,10 +5,9 @@ import { TicketDTO } from '../../models/ticket';
 
 export interface ITicketService {
   create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketDTO[]>;
-  getById(id: string): Promise<TicketDTO>;
-  getWithPagination(searchParameter: ISearchParameterBase, samePromoter: boolean):
+  getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketDTO>;
+  getWithPagination(searchParameter: ISearchParameterBase, additionalInformation: AdditionalInformation):
     Promise<Pagination<TicketDTO>>;
-  updateById(ticket: TicketEntity, additionalInformation: AdditionalInformation):
+  updateById(ticket: string, status: number, additionalInformation: AdditionalInformation):
     Promise<TicketDTO>;
-  deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean>;
 }

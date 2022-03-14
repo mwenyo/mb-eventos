@@ -25,7 +25,8 @@ export enum ErrorCodes {
   EVENT_ALREADY_EXISTS = 'Já existe um evento em aberto com mesmo nome',
   UNAVALIABLE_EVENT = 'Evento indisponível ou inexistente',
   PROFILE_NOT_ALLOWED = 'Perfil não permitido',
-  TICKET_LIMIT_REACHED = 'Limite de compra de ingressos atingido'
+  TICKET_LIMIT_REACHED = 'Limite de compra de ingressos atingido',
+  NO_AFFECTED_DATA = 'Não houve alterações nos dados',
 }
 
 export enum ValidationErrorCodes {
@@ -44,5 +45,6 @@ export enum ValidationErrorCodes {
   INVALID_TICKET_QNT = 'A quantidade de ingressos inválida',
   INVALID_TICKET_PRICE = 'Valor do ingresso inválido',
   END_DATE_GT_START_DATE = 'A data de encerramento não pode ser antes da data de abertura',
-  DATE_IN_PAST = 'A data não pode ser antes de hoje'
+  DATE_IN_PAST = 'A data não pode ser antes de hoje',
+  INVALID_TICKET_STATUS = 'Status inválido'
 }

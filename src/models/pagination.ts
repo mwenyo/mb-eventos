@@ -23,5 +23,7 @@ export interface ISearchParameterEvent extends ISearchParameterBase {
 
 export interface ISearchParameterTicket extends ISearchParameterBase {
   participant: string | null;
+  promoter: string | null;
   event: string | null;
+  status: number | null;
 }

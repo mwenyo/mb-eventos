@@ -18,64 +18,71 @@ import { eventMapToDTO } from '../../models/mappers/event';
 export class TicketRepository implements ITicketRepository {
   private ticketRepository: Repository<TicketEntity> = getRepository(TicketEntity);
 
-  async create(tickets: TicketEntity[]): Promise<TicketEntity[]> {
+  async create(tickets: TicketEntity[]): Promise<any> {
     const saved = await this.ticketRepository
       .createQueryBuilder()
       .insert()
       .into('ticket')
       .values(tickets)
       .execute();
-    const saveMapped = (await this.ticketRepository
+    /* const saveMapped = (await this.ticketRepository
       .findByIds(
         saved.identifiers,
         { relations: ['event', 'participant'] }
       ))
-      .map(ticket => ticketMapToDTO(ticket))
-    return saveMapped;
+      .map(ticket => ticketMapToDTO(ticket)) */
+    return saved;
   }
 
-  // async selectPagination(searchParameter: ISearchParameterTicket, fields: (keyof TicketEntity)[]): Promise<Pagination<TicketEntity>> {
-  async selectPagination(searchParameter: ISearchParameterTicket): Promise<Pagination<TicketEntity>> {
+  async selectPagination(searchParameter: ISearchParameterTicket): Promise<any> {//Promise<Pagination<TicketEntity>> {
     let where: any = { deletedAt: null };
     if (searchParameter.event) {
-      where = { ...where, event: ILike(`%${searchParameter.event}%`) };
+      where = { ...where, event: searchParameter.event };
     }
     if (searchParameter.participant) {
-      where = { ...where, participant: searchParameter.participant };
+      where = { ...where, participant: { id: searchParameter.participant } };
     }
-    const [rows, count] = await this.ticketRepository.findAndCount({
-      where,
-      skip: searchParameter.offset,
-      take: searchParameter.limit,
-      order: {
-        [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
-      },
-      relations: ['participant', 'event'],
-    });
-
-    const rowsMapped = rows.map(row => {
-      row.participant = userMapToDTO(row.participant)
-      row.event = eventMapToDTO(row.event)
-      return ticketMapToDTO(row);
-    })
+    if (searchParameter.promoter) {
+      where = { ...where, event: { promoter: searchParameter.promoter } };
+    }
+    if (searchParameter.status) {
+      where = { ...where, status: searchParameter.status };
+    }
+    const [rows, count] = await this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.participant', 'participant')
+      .leftJoinAndSelect('ticket.event', 'event')
+      .select([
+        'ticket.id',
+        'ticket.code',
+        'ticket.status',
+        'ticket.createdAt',
+        'ticket.updatedAt',
+        'event.id',
+        'event.name',
+        'event.address',
+        'participant.id',
+        'participant.name',
+      ])
+      .where(where)
+      .skip(searchParameter.offset)
+      .take(searchParameter.limit)
+      .orderBy('ticket.' + searchParameter.orderBy, searchParameter.isDESC ? 'DESC' : 'ASC')
+      .getManyAndCount();
 
     return {
       count,
-      rows: rowsMapped,
+      rows
     };
   }
 
-  async selectById(id: string, options?: FindOneOptions<TicketEntity>): Promise<TicketEntity> {
+  async selectById(id: string): Promise<TicketEntity> {
     return this.ticketRepository.findOne({
       where: {
         id,
-        ...options
       },
-    })
-  }
-
-  async selectByIdList(idList: string[]): Promise<TicketEntity[]> {
-    return this.ticketRepository.findByIds(idList);
+      relations: ['event', 'participant', 'event.promoter']
+    });
   }
 
   async selectOneByOptions(options: FindOneOptions<TicketEntity>): Promise<TicketEntity | null> {
@@ -93,9 +100,5 @@ export class TicketRepository implements ITicketRepository {
 
   async selectByWhere(where: FindManyOptions<TicketEntity>): Promise<TicketEntity[] | null> {
     return this.ticketRepository.find(where);
-  }
-
-  async deleteById(id: string): Promise<DeleteResult> {
-    return this.ticketRepository.softDelete({ id });
   }
 }

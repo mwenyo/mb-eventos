@@ -1,8 +1,7 @@
 import { inject, injectable } from 'inversify';
 
 import TYPES from '../utilities/types';
-import BusinessError, { ErrorCodes, ValidationErrorCodes } from '../utilities/errors/business';
-import { ILike } from 'typeorm';
+import BusinessError, { ErrorCodes } from '../utilities/errors/business';
 
 import TicketEntity from '../db/entities/ticket';
 import { ITicketRepository } from '../db/repositories/interfaces/ticket';
@@ -17,6 +16,7 @@ import { userMapToDTO } from '../models/mappers/user';
 import { IEventRepository } from '../db/repositories/interfaces/event';
 import EventStatus from '../enumerators/event-status';
 import { eventMapToDTO } from '../models/mappers/event';
+import ProfileType from '../enumerators/profile-type';
 
 @injectable()
 export class TicketService implements ITicketService {
@@ -31,10 +31,23 @@ export class TicketService implements ITicketService {
     this.eventRepository = eventRepository;
   }
 
-  async getById(ticketId: string): Promise<TicketDTO> {
-    const ticket = await this.ticketRepository.selectById(ticketId);
-    if (!ticket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
-    return ticket;
+  async getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketDTO> {
+    const { actor } = additionalInformation;
+    const existTicket = ticketMapToDTO(await this.ticketRepository.selectById(ticketId));
+
+    if (!existTicket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
+
+    if ((actor.profileType === ProfileType.PARTICIPANT && existTicket.participant.id !== actor.id) ||
+      (actor.profileType === ProfileType.PROMOTER && existTicket.event.promoter.id !== actor.id)
+    ) {
+      throw new BusinessError(ErrorCodes.USER_BLOCKED);
+    }
+
+    existTicket.event = eventMapToDTO(existTicket.event);
+    existTicket.event.promoter = userMapToDTO(existTicket.event.promoter);
+    existTicket.participant = userMapToDTO(existTicket.participant);
+
+    return existTicket;
   }
 
   async create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketDTO[]> {
@@ -59,12 +72,12 @@ export class TicketService implements ITicketService {
       ticketsSold: updatedTicketSold,
       ...lastTicketSold && { status: EventStatus.CLOSED },
       updatedBy: 'SYSTEM',
-    }
+    };
     await this.eventRepository.updateById(event, eventToUpdate);
-    const eventSaved = await this.eventRepository.selectById(event)
+    const eventSaved = await this.eventRepository.selectById(event);
     const ticketsToSaved: TicketEntity[] = [];
     for (let i = 0; i < quantity; i++) {
-      const code = Math.floor(Date.now() * Math.random()).toString(36).toUpperCase()
+      const code = Math.floor(Date.now() * Math.random()).toString(36).toUpperCase();
       const ticketToSave = {
         participant: actor,
         event: eventSaved,
@@ -73,83 +86,67 @@ export class TicketService implements ITicketService {
         createdBy: (actor && actor.id) || 'SYSTEM',
         updatedBy: (actor && actor.id) || 'SYSTEM',
       };
-      ticketsToSaved.push(ticketToSave)
+      ticketsToSaved.push(ticketToSave);
     }
     const ticketsSaved = await this.ticketRepository.create(ticketsToSaved);
     ticketsSaved.map(ticket => {
-      ticket.participant = userMapToDTO(ticket.participant)
-      ticket.event = eventMapToDTO(ticket.event)
-      return ticket
+      ticket.participant = userMapToDTO(ticket.participant);
+      ticket.event = eventMapToDTO(ticket.event);
+      return ticket;
     });
     return ticketsSaved;
   }
 
-  async getWithPagination(searchParameter: ISearchParameterTicket | null, samePromoter: boolean):
+  async getWithPagination(searchParameter: ISearchParameterTicket | null, additionalInformation: AdditionalInformation):
     Promise<Pagination<TicketDTO> | null> {
-    /* const response = await this.ticketRepository.selectPagination(searchParameter);
-    if (samePromoter) {
-      response.rows = response.rows.map(row => {
-        delete (row.promoter);
-        return row;
-      });
-    }
-    return response; */
-    throw Error('Not implemented yet!')
+    const { actor } = additionalInformation;
+    if (actor.profileType === ProfileType.PARTICIPANT) searchParameter.participant = actor.id;
+    if (actor.profileType === ProfileType.PROMOTER) searchParameter.promoter = actor.id;
+    const response = await this.ticketRepository.selectPagination(searchParameter);
+    return response;
   }
 
-  async updateById(ticket: TicketEntity, additionalInformation: AdditionalInformation): Promise<TicketDTO | null> {
-    /* const { actor } = additionalInformation;
-
-    const existTicket = await this.ticketRepository.selectById(ticket.id)
-
-    if (!existTicket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
-
-    const existTickets = await this.ticketRepository.selectByWhere({
+  async updateById(ticket: string, status: number, additionalInformation: AdditionalInformation): Promise<TicketDTO | null> {
+    const { actor } = additionalInformation;
+    const existTicket = await this.ticketRepository.selectOneByOptions({
       where: {
-        name: ILike(`${ticket.name}`),
-        status: TicketStatus.FORSALE
-      }
-    })
+        status: TicketStatus.ACTIVE
+      },
+      relations: ['event', 'participant', 'event.promoter']
+    });
 
-    if (existTickets.length !== 0) throw new BusinessError(ErrorCodes.EVENT_ALREADY_EXISTS)
+    if (!existTicket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
 
-    if (existTicket.ticketsSold > ticket.tickets) throw new BusinessError(ValidationErrorCodes.INVALID_TICKET_QNT)
+    if (existTicket.event.status !== EventStatus.FORSALE) throw new BusinessError(ErrorCodes.UNAVALIABLE_EVENT);
+
+    if (((actor.profileType === ProfileType.PARTICIPANT) &&
+      (status !== TicketStatus.CANCELLED || existTicket.participant.id !== actor.id)) ||
+      (actor.profileType === ProfileType.PROMOTER && existTicket.event.promoter.id !== actor.id) ||
+      (existTicket.status === status)
+    ) {
+      throw new BusinessError(ErrorCodes.USER_BLOCKED);
+    }
+
+    if (status === TicketStatus.CANCELLED) {
+      const updatedTicketSold = existTicket.event.ticketsSold - 1
+      const eventToUpdate = {
+        ticketsSold: updatedTicketSold,
+        updatedBy: 'SYSTEM',
+      };
+      await this.eventRepository.updateById(existTicket.event.id, eventToUpdate);
+      const eventSaved = await this.eventRepository.selectById(existTicket.event.id);
+      existTicket.event = eventSaved;
+    }
 
     const ticketToUpdate = {
-      ...ticket.name && { ticket: ticket.name },
-      ...ticket.address && { ticket: ticket.address },
-      ...ticket.description && { ticket: ticket.description },
-      ...ticket.startDate && { ticket: ticket.startDate },
-      ...ticket.endDate && { ticket: ticket.endDate },
-      ...ticket.tickets && { ticket: ticket.tickets },
-      ...ticket.ticketPrice && { ticket: ticket.ticketPrice },
-      ...ticket.limitByParticipant && { ticket: ticket.limitByParticipant },
-      ...ticket.status && { ticket: ticket.status },
+      status,
       updatedBy: (actor && actor.id) || 'SYSTEM',
     };
-
-    await this.ticketRepository.updateById(ticket.id, ticketToUpdate)
-    const response = await this.getById(ticket.id);
-    response.promoter = userMapToDTO(response.promoter)
-    return ticketMapToDTO(response); */
-    throw Error('Not implemented yet!')
-  }
-
-  async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
-    /* const { actor } = additionalInformation
-    const ticket = await this.getById(id);
-
-    if (!ticket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
-
-    const ticketToSave = {
-      deletedBy: (actor && actor.id) || 'SYSTEM',
-      deletedAt: new Date(),
-    };
-
-    await this.ticketRepository.updateById(id, ticketToSave)
-
-    await this.ticketRepository.deleteById(id);
-    return true; */
-    throw Error('Not implemented yet!')
+    await this.ticketRepository.updateById(ticket, ticketToUpdate);
+    const response = await this.ticketRepository.selectById(ticket);
+    response.participant = userMapToDTO(response.participant);
+    response.event = eventMapToDTO(response.event);
+    response.event.promoter = eventMapToDTO(response.event.promoter);
+    return ticketMapToDTO(response);
   }
 }
