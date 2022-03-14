@@ -23,7 +23,9 @@ export enum ErrorCodes {
   ENTITY_NOT_FOUND = 'Entidade não encontrada',
   USER_ALREADY_EXISTS = 'Usuário já existente',
   EVENT_ALREADY_EXISTS = 'Já existe um evento em aberto com mesmo nome',
+  UNAVALIABLE_EVENT = 'Evento indisponível ou inexistente',
   PROFILE_NOT_ALLOWED = 'Perfil não permitido',
+  TICKET_LIMIT_REACHED = 'Limite de compra de ingressos atingido'
 }
 
 export enum ValidationErrorCodes {

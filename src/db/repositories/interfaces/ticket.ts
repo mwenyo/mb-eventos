@@ -3,7 +3,7 @@ import { Pagination, ISearchParameterBase } from '../../../models/pagination';
 import { DeleteResult, FindManyOptions, FindOneOptions, UpdateResult } from 'typeorm';
 
 export interface ITicketRepository {
-  create(ticket: TicketEntity): Promise<TicketEntity>;
+  create(ticket: TicketEntity[]): Promise<TicketEntity[]>;
   selectById(id: string, options?: FindOneOptions<TicketEntity>): Promise<TicketEntity | null>;
   updateById(id: string, ticket: TicketEntity): Promise<UpdateResult>;
   selectByIdList(idList: string[]): Promise<TicketEntity[] | null>;

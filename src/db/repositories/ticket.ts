@@ -18,8 +18,20 @@ import { eventMapToDTO } from '../../models/mappers/event';
 export class TicketRepository implements ITicketRepository {
   private ticketRepository: Repository<TicketEntity> = getRepository(TicketEntity);
 
-  async create(ticket: TicketEntity): Promise<TicketEntity> {
-    return this.ticketRepository.save(ticket);
+  async create(tickets: TicketEntity[]): Promise<TicketEntity[]> {
+    const saved = await this.ticketRepository
+      .createQueryBuilder()
+      .insert()
+      .into('ticket')
+      .values(tickets)
+      .execute();
+    const saveMapped = (await this.ticketRepository
+      .findByIds(
+        saved.identifiers,
+        { relations: ['event', 'participant'] }
+      ))
+      .map(ticket => ticketMapToDTO(ticket))
+    return saveMapped;
   }
 
   // async selectPagination(searchParameter: ISearchParameterTicket, fields: (keyof TicketEntity)[]): Promise<Pagination<TicketEntity>> {

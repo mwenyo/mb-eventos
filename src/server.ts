@@ -15,17 +15,21 @@ import { ConstantsEnv } from './constants';
 import LoggerManager from './utilities/logger-manager';
 
 import { IUserService } from './services/interfaces/user';
+import { IEventService } from './services/interfaces/event';
+import { IUserCredentialService } from './services/interfaces/user-credential';
 import { UserService } from './services/user';
 import { UserRepository } from './db/repositories/user';
 import { IUserRepository } from './db/repositories/interfaces/user';
 
-import { IUserCredentialService } from './services/interfaces/user-credential';
+import { IEventRepository } from './db/repositories/interfaces/event';
 import { UserCredentialService } from './services/user-credential';
 
-import { IEventService } from './services/interfaces/event';
 import { EventService } from './services/event';
 import { EventRepository } from './db/repositories/event';
-import { IEventRepository } from './db/repositories/interfaces/event';
+import { ITicketService } from './services/interfaces/ticket';
+import { ITicketRepository } from './db/repositories/interfaces/ticket';
+import { TicketService } from './services/ticket';
+import { TicketRepository } from './db/repositories/ticket';
 
 const container: Container = new Container();
 
@@ -76,10 +80,17 @@ export class Server {
       .bind<IUserService>(TYPES.UserService).to(UserService);
     container
       .bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+
     container
       .bind<IEventService>(TYPES.EventService).to(EventService);
     container
       .bind<IEventRepository>(TYPES.EventRepository).to(EventRepository);
+
+    container
+      .bind<ITicketService>(TYPES.TicketService).to(TicketService);
+    container
+      .bind<ITicketRepository>(TYPES.TicketRepository).to(TicketRepository);
+
     container
       .bind<IUserCredentialService>(TYPES.UserCredentialService)
       .to(UserCredentialService);
