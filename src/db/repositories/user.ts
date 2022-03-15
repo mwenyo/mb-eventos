@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import {
   DeleteResult,
-  FindConditions, FindManyOptions, FindOneOptions,
+  FindManyOptions, FindOneOptions,
   getRepository, ILike, Repository, UpdateResult,
 } from 'typeorm';
 
@@ -71,13 +71,19 @@ export class UserRepository implements IUserRepository {
       .getOne();
   }
 
+  async selectByWhere(where: FindManyOptions<UserEntity>): Promise<UserEntity[] | null> {
+    return this.userRepository.find(where);
+  }
+
+  async selectOneByOptions(options: FindOneOptions<UserEntity>): Promise<UserEntity | null> {
+    return this.userRepository.findOne(options);
+  }
+
   async updateById(id: string, user: UserEntity): Promise<UpdateResult> {
     return this.userRepository.update(id, user);
   }
 
-  async selectByWhere(where: FindManyOptions<UserEntity>): Promise<UserEntity[] | null> {
-    return this.userRepository.find(where);
-  }
+
 
   async deleteById(id: string): Promise<DeleteResult> {
     return this.userRepository.softDelete({ id });

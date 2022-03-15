@@ -8,5 +8,6 @@ export interface IUserRepository {
   selectById(id: string, options?: FindOneOptions<UserEntity>): Promise<UserEntity | null>;
   updateById(id: string, user: UserEntity): Promise<UpdateResult>;
   selectByWhere(where: FindManyOptions<UserEntity>): Promise<UserEntity[] | null>;
+  selectOneByOptions(options: FindOneOptions<UserEntity>): Promise<UserEntity | null>;
   deleteById(id: string): Promise<DeleteResult>;
 }
