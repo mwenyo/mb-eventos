@@ -21,8 +21,7 @@ import EventEntity from '../../db/entities/event';
 import { IEventService } from '../../services/interfaces/event';
 
 import { ICustomRequest } from '../../models/custom-request';
-import { eventMapToEntity } from '../../models/mappers/event';
-import { AdditionalInformation } from '../../models/user';
+
 import { Pagination, ISearchParameterEvent } from '../../models/pagination';
 
 import {
@@ -52,11 +51,11 @@ export class EventController extends BaseHttpController implements interfaces.Co
   private async create(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
 
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
+    const actor = req.user;
 
-    return await this.eventService.create(eventMapToEntity(req.body), additionalInformation);
+    const event: EventEntity = req.body
+
+    return await this.eventService.create(event, actor);
   }
 
   @httpGet('/myEvents',
@@ -81,7 +80,8 @@ export class EventController extends BaseHttpController implements interfaces.Co
   )
   private async getById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    return await this.eventService.getById(req.params.id);
+    const actor = req.user;
+    return await this.eventService.getById(req.params.id, actor);
   }
 
   @httpGet('/',
@@ -113,12 +113,10 @@ export class EventController extends BaseHttpController implements interfaces.Co
       return res.sendStatus(204)
     }
     //req.body.limitByParticipant = req.body.limitByParticipant.toLowerCase() == "true"
-    const event = eventMapToEntity(req.body);
+    const event: EventEntity = req.body;
     event.id = req.params.id;
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.eventService.updateById(event, additionalInformation);
+    const actor = req.user;
+    return await this.eventService.updateById(event, actor);
   }
 
   @httpDelete('/:id',
@@ -128,9 +126,7 @@ export class EventController extends BaseHttpController implements interfaces.Co
   )
   private async deleteById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.eventService.deleteById(req.params.id, additionalInformation);
+    const actor = req.user;
+    return await this.eventService.deleteById(req.params.id, actor);
   }
 }

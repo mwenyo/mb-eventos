@@ -1,8 +1,7 @@
 import { injectable } from 'inversify';
 import {
-  DeleteResult,
-  FindManyOptions, FindOneOptions,
-  getRepository, ILike, In, Repository, UpdateResult,
+  FindOneOptions,
+  getRepository, In, Repository,
 } from 'typeorm';
 
 import TicketEntity from '../entities/ticket';
@@ -78,7 +77,7 @@ export class TicketRepository implements ITicketRepository {
   }
 
   async selectById(id: string): Promise<TicketEntity> {
-    return this.ticketRepository
+    return await this.ticketRepository
       .createQueryBuilder('ticket')
       .leftJoinAndSelect('ticket.participant', 'participant')
       .leftJoinAndSelect('ticket.event', 'event')

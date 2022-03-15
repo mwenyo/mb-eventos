@@ -23,8 +23,6 @@ import { IUserService } from '../../services/interfaces/user';
 
 import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { ICustomRequest } from '../../models/custom-request';
-import { AdditionalInformation } from '../../models/user';
-import { userMapToEntity } from '../../models/mappers/user';
 
 import {
   userCreateRouteValidation,
@@ -52,8 +50,9 @@ export class UserController extends BaseHttpController implements interfaces.Con
     if (req.cookies.token) return res.status(400).json({ error: ErrorCodes.USER_BLOCKED })
 
     validationRoute(req, res)
+    const user: UserEntity = req.body
 
-    return await this.userService.create(userMapToEntity(req.body));
+    return await this.userService.create(user);
   }
 
   @httpGet('/me', authenticate)
@@ -103,12 +102,10 @@ export class UserController extends BaseHttpController implements interfaces.Con
     if (Object.keys(req.body).length === 0) {
       return res.sendStatus(204)
     }
-    const user = userMapToEntity(req.body);
+    const user: UserEntity = req.body;
     user.id = req.params.id;
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.userService.updateById(user, additionalInformation);
+    const actor = req.user;
+    return await this.userService.updateById(user, actor);
   }
 
   @httpDelete('/:id',
@@ -117,9 +114,7 @@ export class UserController extends BaseHttpController implements interfaces.Con
   )
   private async deleteById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.userService.deleteById(req.params.id, additionalInformation);
+    const actor = req.user;
+    return await this.userService.deleteById(req.params.id, actor);
   }
 }
