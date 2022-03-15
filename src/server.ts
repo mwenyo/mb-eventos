@@ -12,7 +12,6 @@ import './controllers';
 
 import TYPES from './utilities/types';
 import { ConstantsEnv } from './constants';
-import LoggerManager from './utilities/logger-manager';
 
 import { IUserService } from './services/interfaces/user';
 import { IEventService } from './services/interfaces/event';
@@ -45,7 +44,7 @@ const handleError: any = (err: any, req: Request, res: Response): void => {
   } else if (err.isForbiddenError) {
     res.sendStatus(httpStatus.FORBIDDEN);
   } else {
-    LoggerManager.log('application', {
+    console.log('Error: ', {
       err,
       type: 'error',
       req: {

@@ -15,7 +15,7 @@ import BusinessError, { ErrorCodes } from '../../utilities/errors/business';
 export class EventRepository implements IEventRepository {
   private eventRepository: Repository<EventEntity> = getRepository(EventEntity);
   private fields = [
-    'event.id',
+    'event.id1',
     'event.name',
     'event.startDate',
     'event.endDate',

@@ -1,7 +1,6 @@
 import { createConnection } from 'typeorm';
 import * as path from 'path';
 import { ConstantsEnv } from '../constants';
-import LoggerManager from '../utilities/logger-manager';
 
 export async function initializeDatabase(): Promise<void> {
   await createConnection({
@@ -12,9 +11,6 @@ export async function initializeDatabase(): Promise<void> {
     password: ConstantsEnv.database.password,
     database: ConstantsEnv.database.name,
     port: ConstantsEnv.database.port,
-
-    logging: ['query', 'error', 'migration'],
-    logger: LoggerManager.databaseLogger,
 
     migrations: [`${path.join(__dirname, 'migrations/*{.ts,.js}')}`],
     entities: [`${path.join(__dirname, 'entities/*{.ts,.js}')}`],
