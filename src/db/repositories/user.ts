@@ -12,9 +12,22 @@ import { IUserRepository } from './interfaces/user';
 @injectable()
 export class UserRepository implements IUserRepository {
   private userRepository: Repository<UserEntity> = getRepository(UserEntity);
+  private fields = [
+    'id',
+    'name',
+    'email',
+    'cpfCpnj',
+    'address',
+    'profileType',
+  ]
 
   async create(user: UserEntity): Promise<UserEntity> {
-    return this.userRepository.save(user);
+    const x = await this.userRepository.createQueryBuilder()
+      .insert()
+      .into('user')
+      .values(user)
+      .execute();
+    return this.selectById(user.id);
   }
 
   async selectPagination(searchParameter: ISearchParameterUser): Promise<Pagination<UserEntity>> {
@@ -35,20 +48,14 @@ export class UserRepository implements IUserRepository {
       );
       where = newWhere;
     }
-    const [rows, count] = await this.userRepository.findAndCount({
-      where,
-      skip: searchParameter.offset,
-      take: searchParameter.limit,
-      order: {
-        [searchParameter.orderBy]: searchParameter.isDESC ? 'DESC' : 'ASC',
-      },
-      relations: ['events']
-    });
-
-    /* const rowsMapped = rows.map(row => {
-      row.events = row.events.map(event => eventMapToDTO(event))
-      return userMapToDTO(row)
-    }); */
+    const [rows, count] = await this.userRepository
+      .createQueryBuilder('user')
+      .select(this.fields)
+      .where(where)
+      .skip(searchParameter.offset)
+      .take(searchParameter.limit)
+      .orderBy(searchParameter.orderBy, searchParameter.isDESC ? 'DESC' : 'ASC')
+      .getManyAndCount();
 
     return {
       count,
@@ -56,26 +63,12 @@ export class UserRepository implements IUserRepository {
     };
   }
 
-  async selectById(id: string, options?: FindOneOptions<UserEntity>): Promise<UserEntity> {
-    return this.userRepository.findOne({
-      where: {
-        id,
-        ...options
-      },
-    })
-  }
-
-  async selectByIdList(idList: string[]): Promise<UserEntity[]> {
-    return this.userRepository.findByIds(idList);
-  }
-
-  async selectOneByOptions(options: FindOneOptions<UserEntity>): Promise<UserEntity | null> {
-    return this.userRepository.findOne(options);
-  }
-
-  async selectAllByOptions(options: FindManyOptions<UserEntity>):
-    Promise<UserEntity[] | null> {
-    return this.userRepository.find(options);
+  async selectById(id: string): Promise<UserEntity> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .select(this.fields)
+      .where({ id })
+      .getOne();
   }
 
   async updateById(id: string, user: UserEntity): Promise<UpdateResult> {

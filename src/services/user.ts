@@ -10,9 +10,7 @@ import { IUserService } from './interfaces/user';
 
 import { Pagination, ISearchParameterUser } from '../models/pagination';
 
-import { UserDTO } from '../models/user';
 import ProfileType from '../enumerators/profile-type';
-import { userMapToDTO } from '../models/mappers/user';
 import { hash } from 'bcrypt';
 import { cnpj, cpf } from 'cpf-cnpj-validator';
 
@@ -26,13 +24,13 @@ export class UserService implements IUserService {
     this.userRepository = userRepository;
   }
 
-  async getById(id: string): Promise<UserDTO> {
+  async getById(id: string): Promise<UserEntity> {
     const user: UserEntity = await this.userRepository.selectById(id);
     if (!user) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
-    return userMapToDTO(user);
+    return user;
   }
 
-  async create(newUser: UserEntity): Promise<UserDTO> {
+  async create(newUser: UserEntity): Promise<UserEntity> {
     const existInformation = await this.userRepository.selectByWhere(
       {
         where: [
@@ -49,7 +47,7 @@ export class UserService implements IUserService {
       updatedBy: 'SYSTEM',
     }
     const response = await this.userRepository.create(newUser);
-    return userMapToDTO(response);
+    return response;
   }
 
   async getWithPagination(searchParameter: ISearchParameterUser):
@@ -58,7 +56,7 @@ export class UserService implements IUserService {
     return response;
   }
 
-  async updateById(user: UserEntity, actor: UserEntity): Promise<UserDTO> {
+  async updateById(user: UserEntity, actor: UserEntity): Promise<UserEntity> {
 
     const existUser = await this.userRepository.selectById(user.id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
@@ -95,7 +93,7 @@ export class UserService implements IUserService {
     }
     await this.userRepository.updateById(user.id as string, userToUpdate);
     const updatedUser = await this.userRepository.selectById(existUser.id);
-    return userMapToDTO(updatedUser);
+    return updatedUser;
   }
 
   async deleteById(id: string, actor: UserEntity): Promise<boolean> {
