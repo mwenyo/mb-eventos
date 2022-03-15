@@ -1,6 +1,6 @@
 import { Pagination, ISearchParameterBase } from '../../models/pagination';
 import UserEntity from '../../db/entities/user';
-import { AdditionalInformation, UserDTO } from '../../models/user';
+import { UserDTO } from '../../models/user';
 
 export interface IUserService {
   create(user: UserEntity): Promise<UserDTO>;

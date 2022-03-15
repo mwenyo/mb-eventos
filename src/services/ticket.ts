@@ -14,7 +14,6 @@ import ProfileType from '../enumerators/profile-type';
 import TicketEntity from '../db/entities/ticket';
 
 import { Pagination, ISearchParameterTicket } from '../models/pagination';
-import { AdditionalInformation } from '../models/user';
 import EventEntity from '../db/entities/event';
 import UserEntity from '../db/entities/user';
 

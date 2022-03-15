@@ -9,7 +9,6 @@ import { IEventRepository } from '../db/repositories/interfaces/event';
 import { IEventService } from './interfaces/event';
 import { Pagination, ISearchParameterEvent } from '../models/pagination';
 
-import { AdditionalInformation } from '../models/user';
 import EventStatus from '../enumerators/event-status';
 import UserEntity from '../db/entities/user';
 

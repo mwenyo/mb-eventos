@@ -10,7 +10,7 @@ import { IUserService } from './interfaces/user';
 
 import { Pagination, ISearchParameterUser } from '../models/pagination';
 
-import { AdditionalInformation, UserDTO } from '../models/user';
+import { UserDTO } from '../models/user';
 import ProfileType from '../enumerators/profile-type';
 import { userMapToDTO } from '../models/mappers/user';
 import { hash } from 'bcrypt';

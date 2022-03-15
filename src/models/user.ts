@@ -12,7 +12,3 @@ export interface UserDTO {
   profileType?: number;
   events?: EventEntity[];
 }
-
-export interface AdditionalInformation {
-  actor?: UserEntity;
-}
