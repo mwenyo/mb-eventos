@@ -7,13 +7,10 @@ import { ILike } from 'typeorm';
 import EventEntity from '../db/entities/event';
 import { IEventRepository } from '../db/repositories/interfaces/event';
 import { IEventService } from './interfaces/event';
-import { EventDTO } from '../models/event';
-
 import { Pagination, ISearchParameterEvent } from '../models/pagination';
+
 import { AdditionalInformation } from '../models/user';
-import { eventMapToDTO } from '../models/mappers/event';
 import EventStatus from '../enumerators/event-status';
-import { userMapToDTO } from '../models/mappers/user';
 
 @injectable()
 export class EventService implements IEventService {
@@ -25,14 +22,15 @@ export class EventService implements IEventService {
     this.eventRepository = eventRepository;
   }
 
-  async getById(eventId: string): Promise<EventDTO> {
+  async getById(eventId: string, additionalInformation: AdditionalInformation): Promise<EventEntity> {
+    const { actor } = additionalInformation;
     const event = await this.eventRepository.selectById(eventId);
+    if (actor.id !== event.promoter.id) delete (event.ticketsSold);
     if (!event) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
     return event;
   }
 
-
-  async create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO> {
+  async create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventEntity> {
 
     const { actor } = additionalInformation
 
@@ -60,24 +58,17 @@ export class EventService implements IEventService {
     };
 
     const eventSaved = await this.eventRepository.create(eventToSave);
-    eventSaved.promoter = userMapToDTO(eventSaved.promoter)
 
-    return eventMapToDTO(eventSaved);
+    return eventSaved;
   }
 
   async getWithPagination(searchParameter: ISearchParameterEvent | null, samePromoter: boolean):
-    Promise<Pagination<EventDTO> | null> {
-    const response = await this.eventRepository.selectPagination(searchParameter);
-    if (samePromoter) {
-      response.rows = response.rows.map(row => {
-        delete (row.promoter);
-        return row;
-      });
-    }
+    Promise<Pagination<EventEntity> | null> {
+    const response = await this.eventRepository.selectPagination(searchParameter, samePromoter);
     return response;
   }
 
-  async updateById(eventUpdateRequest: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
+  async updateById(eventUpdateRequest: EventEntity, additionalInformation: AdditionalInformation): Promise<EventEntity | null> {
     const { actor } = additionalInformation;
 
     const existEvent = await this.eventRepository.selectById(eventUpdateRequest.id)
@@ -109,14 +100,13 @@ export class EventService implements IEventService {
     };
 
     await this.eventRepository.updateById(eventUpdateRequest.id, eventToUpdate)
-    const response = await this.getById(eventUpdateRequest.id);
-    response.promoter = userMapToDTO(response.promoter)
-    return eventMapToDTO(response);
+    const response = await this.getById(eventUpdateRequest.id, additionalInformation);
+    return response;
   }
 
   async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
     const { actor } = additionalInformation
-    const event = await this.getById(id);
+    const event = await this.getById(id, additionalInformation);
 
     if (!event) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
 

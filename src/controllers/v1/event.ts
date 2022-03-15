@@ -21,7 +21,6 @@ import EventEntity from '../../db/entities/event';
 import { IEventService } from '../../services/interfaces/event';
 
 import { ICustomRequest } from '../../models/custom-request';
-import { eventMapToEntity } from '../../models/mappers/event';
 import { AdditionalInformation } from '../../models/user';
 import { Pagination, ISearchParameterEvent } from '../../models/pagination';
 
@@ -56,7 +55,9 @@ export class EventController extends BaseHttpController implements interfaces.Co
       actor: req.user,
     }
 
-    return await this.eventService.create(eventMapToEntity(req.body), additionalInformation);
+    const event: EventEntity = req.body
+
+    return await this.eventService.create(event, additionalInformation);
   }
 
   @httpGet('/myEvents',
@@ -81,7 +82,10 @@ export class EventController extends BaseHttpController implements interfaces.Co
   )
   private async getById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    return await this.eventService.getById(req.params.id);
+    const additionalInformation = {
+      actor: req.user
+    }
+    return await this.eventService.getById(req.params.id, additionalInformation);
   }
 
   @httpGet('/',
@@ -113,7 +117,7 @@ export class EventController extends BaseHttpController implements interfaces.Co
       return res.sendStatus(204)
     }
     //req.body.limitByParticipant = req.body.limitByParticipant.toLowerCase() == "true"
-    const event = eventMapToEntity(req.body);
+    const event: EventEntity = req.body;
     event.id = req.params.id;
     const additionalInformation: AdditionalInformation = {
       actor: req.user,

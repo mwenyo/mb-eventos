@@ -5,11 +5,10 @@ import { DeleteResult, FindManyOptions, FindOneOptions, UpdateResult } from 'typ
 export interface IEventRepository {
   create(event: EventEntity): Promise<EventEntity>;
   selectById(id: string, options?: FindOneOptions<EventEntity>): Promise<EventEntity | null>;
-  updateById(id: string, event: EventEntity): Promise<UpdateResult>;
-  selectByIdList(idList: string[]): Promise<EventEntity[] | null>;
+  updateById(id: string, event: EventEntity): Promise<EventEntity>;
   selectByWhere(where: FindManyOptions<EventEntity>): Promise<EventEntity[] | null>;
-  selectOneByOptions(options: FindOneOptions<EventEntity>): Promise<EventEntity | null>;
-  selectPagination(searchParameter: ISearchParameterBase): Promise<Pagination<EventEntity>>;
-  selectAllByOptions(options: FindManyOptions<EventEntity>): Promise<EventEntity[] | null>;
+  selectPagination(searchParameter: ISearchParameterBase, samePromoter: boolean): Promise<Pagination<EventEntity>>;
   deleteById(id: string): Promise<DeleteResult>;
+  decreaseEventTicketSold(event: EventEntity): Promise<EventEntity>;
+  increaseEventTicketSold(event: EventEntity, quantity: number): Promise<EventEntity>;
 }

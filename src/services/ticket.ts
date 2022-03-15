@@ -11,11 +11,12 @@ import TicketStatus from '../enumerators/ticket-status';
 import EventStatus from '../enumerators/event-status';
 import ProfileType from '../enumerators/profile-type';
 
-import EventEntity from '../db/entities/event';
 import TicketEntity from '../db/entities/ticket';
 
 import { Pagination, ISearchParameterTicket } from '../models/pagination';
 import { AdditionalInformation } from '../models/user';
+import EventEntity from '../db/entities/event';
+import UserEntity from '../db/entities/user';
 
 @injectable()
 export class TicketService implements ITicketService {
@@ -50,32 +51,9 @@ export class TicketService implements ITicketService {
     const existEvent = await this.eventRepository.selectById(event);
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
     if (existEvent.status !== EventStatus.FORSALE) throw new BusinessError(ErrorCodes.UNAVALIABLE_EVENT);
-    if (existEvent.limitByParticipant) {
-      const existTicket = await this.ticketRepository.selectOneByOptions({
-        where: {
-          event: existEvent.id,
-          participant: actor.id,
-          status: TicketStatus.ACTIVE
-        }
-      });
-      if (existTicket) throw new BusinessError(ErrorCodes.TICKET_LIMIT_REACHED);
-    }
-
-    const eventSaved = await this.increaseEventTicketSold(existEvent, quantity);
-
-    const ticketsToSaved: TicketEntity[] = [];
-    for (let i = 0; i < quantity; i++) {
-      const code = Math.floor(Date.now() * Math.random()).toString(36).toUpperCase();
-      const ticketToSave = {
-        participant: actor,
-        event: eventSaved,
-        code,
-        status: TicketStatus.ACTIVE,
-        createdBy: (actor && actor.id) || 'SYSTEM',
-        updatedBy: (actor && actor.id) || 'SYSTEM',
-      };
-      ticketsToSaved.push(ticketToSave);
-    }
+    if (existEvent.limitByParticipant) await this.verifyTicketLimit(existEvent, actor);
+    const eventSaved = await this.eventRepository.increaseEventTicketSold(existEvent, quantity);
+    const ticketsToSaved = this.createTicketArray(quantity, actor, eventSaved);
     const ticketsSaved = await this.ticketRepository.create(ticketsToSaved);
     return ticketsSaved;
   }
@@ -114,7 +92,7 @@ export class TicketService implements ITicketService {
       throw new BusinessError(ErrorCodes.USER_BLOCKED);
     }
     if (status === TicketStatus.CANCELLED) {
-      await this.decreaseEventTicketSold(existTicket);
+      await this.eventRepository.decreaseEventTicketSold(existTicket);
     }
     const ticketToUpdate = {
       status,
@@ -125,35 +103,31 @@ export class TicketService implements ITicketService {
     return response;
   }
 
-  private async increaseEventTicketSold(
-    event: EventEntity,
-    quantity: number
-  ): Promise<EventEntity> {
-    const updatedTicketSold = event.ticketsSold + quantity;
-    const ticketLimitReached = updatedTicketSold > event.tickets;
-    if (ticketLimitReached) throw new BusinessError(ErrorCodes.TICKET_LIMIT_REACHED);
-    const lastTicketSold = updatedTicketSold === event.tickets;
-    const eventToUpdate = {
-      ticketsSold: updatedTicketSold,
-      ...lastTicketSold && { status: EventStatus.CLOSED },
-      updatedBy: 'SYSTEM',
-    };
-    await this.eventRepository.updateById(event.id, eventToUpdate);
-    const eventSaved = await this.eventRepository.selectById(event.id);
-    return eventSaved;
+  private async verifyTicketLimit(event: EventEntity, actor: UserEntity) {
+    const existTicket = await this.ticketRepository.selectOneByOptions({
+      where: {
+        event: event.id,
+        participant: actor.id,
+        status: TicketStatus.ACTIVE
+      }
+    });
+    if (existTicket) throw new BusinessError(ErrorCodes.TICKET_LIMIT_REACHED);
   }
 
-  private async decreaseEventTicketSold(ticket: TicketEntity): Promise<TicketEntity> {
-    const updatedTicketSold = ticket.event.ticketsSold - 1
-    const eventClosed = ticket.event.status === EventStatus.CLOSED;
-    const eventToUpdate = {
-      ticketsSold: updatedTicketSold,
-      ...eventClosed && { status: EventStatus.FORSALE },
-      updatedBy: 'SYSTEM',
-    };
-    await this.eventRepository.updateById(ticket.event.id, eventToUpdate);
-    const eventSaved = await this.eventRepository.selectById(ticket.event.id);
-    ticket.event = eventSaved;
-    return ticket;
+  private createTicketArray(quantity: number, actor: UserEntity, event: EventEntity): TicketEntity[] {
+    const ticketArray: TicketEntity[] = [];
+    for (let i = 0; i < quantity; i++) {
+      const code = Math.floor(Date.now() * Math.random()).toString(36).toUpperCase();
+      const ticketToSave = {
+        participant: actor,
+        event: event,
+        code,
+        status: TicketStatus.ACTIVE,
+        createdBy: (actor && actor.id) || 'SYSTEM',
+        updatedBy: (actor && actor.id) || 'SYSTEM',
+      };
+      ticketArray.push(ticketToSave);
+    }
+    return ticketArray;
   }
 }
