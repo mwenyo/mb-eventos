@@ -7,6 +7,7 @@ export const eventCreateRouteValidation = [
     .exists({ checkFalsy: true, checkNull: true })
     .not()
     .isEmpty()
+    .trim()
     .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
   check('address')
     .exists({ checkFalsy: true, checkNull: true })
@@ -21,7 +22,8 @@ export const eventCreateRouteValidation = [
         throw new BusinessError(ValidationErrorCodes.DATE_IN_PAST);
       }
       return true;
-    }),
+    })
+    .toDate(),
   check('endDate')
     .isISO8601()
     .withMessage(ValidationErrorCodes.INVALID_DATETIME)
@@ -32,16 +34,20 @@ export const eventCreateRouteValidation = [
         throw new BusinessError(ValidationErrorCodes.END_DATE_GT_START_DATE);
       }
       return true;
-    }),
+    })
+    .toDate(),
   check('tickets')
     .isInt({ gt: 0 })
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT)
+    .toInt(),
   check('ticketPrice')
     .isNumeric()
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE)
+    .toFloat(),
   check('limitByParticipant')
     .isBoolean()
     .withMessage(ValidationErrorCodes.REQUIRED_FIELD)
+    .toBoolean()
 ]
 
 export const eventUpdateByIdRouteValidation = [
@@ -56,7 +62,8 @@ export const eventUpdateByIdRouteValidation = [
         throw new BusinessError(ValidationErrorCodes.DATE_IN_PAST);
       }
       return true;
-    }),
+    })
+    .toDate(),
   check('endDate')
     .optional({ checkFalsy: false })
     .isISO8601()
@@ -68,23 +75,28 @@ export const eventUpdateByIdRouteValidation = [
         throw new BusinessError(ValidationErrorCodes.END_DATE_GT_START_DATE);
       }
       return true;
-    }),
+    })
+    .toDate(),
   check('tickets')
     .optional({ checkFalsy: false })
     .isInt({ gt: 0 })
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT)
+    .toInt(),
   check('ticketPrice')
     .optional({ checkFalsy: false })
     .isNumeric()
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_PRICE)
+    .toFloat(),
   check('limitByParticipant')
     .optional({ checkFalsy: false })
     .isBoolean()
-    .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
+    .withMessage(ValidationErrorCodes.INVALID_BOOLEAN)
+    .toBoolean(),
   check('status')
     .optional({ checkFalsy: false })
     .isIn([EventStatus.CANCELLED, EventStatus.CLOSED, EventStatus.FORSALE])
-    .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
+    .withMessage(ValidationErrorCodes.REQUIRED_FIELD)
+    .toInt(),
 ]
 
 export const eventGetByIdRouteValidation = [

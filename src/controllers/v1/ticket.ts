@@ -51,7 +51,8 @@ export class TicketController extends BaseHttpController implements interfaces.C
       actor: req.user,
     }
     return await this.ticketService.create(
-      parseInt(req.body.quantity),
+      //parseInt(req.body.quantity),
+      req.body.quantity,
       req.body.event,
       additionalInformation
     );
