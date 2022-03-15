@@ -87,10 +87,10 @@ export class UserService implements IUserService {
       }
     }
     const userToUpdate: UserEntity = {
-      ...user.name && { name: user.name },
-      ...user.address && { address: user.address },
-      ...user.cpfCpnj && { cpfCpnj: user.cpfCpnj },
-      ...user.email && { email: user.email },
+      ...user.name !== undefined && { name: user.name },
+      ...user.address !== undefined && { address: user.address },
+      ...user.cpfCpnj !== undefined && { cpfCpnj: user.cpfCpnj },
+      ...user.email !== undefined && { email: user.email },
       updatedBy: actor.id ? actor.id : 'SYSTEM',
     }
     await this.userRepository.updateById(user.id as string, userToUpdate);

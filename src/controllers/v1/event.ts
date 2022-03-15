@@ -112,6 +112,7 @@ export class EventController extends BaseHttpController implements interfaces.Co
     if (Object.keys(req.body).length === 0) {
       return res.sendStatus(204)
     }
+    //req.body.limitByParticipant = req.body.limitByParticipant.toLowerCase() == "true"
     const event = eventMapToEntity(req.body);
     event.id = req.params.id;
     const additionalInformation: AdditionalInformation = {

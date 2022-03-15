@@ -8,13 +8,15 @@ export const userCreateRouteValidation = [
   ,
   check('email')
     .isEmail()
-    .withMessage(ValidationErrorCodes.INVALID_EMAIL),
+    .withMessage(ValidationErrorCodes.INVALID_EMAIL)
+    .normalizeEmail(),
   check('profileType')
     .isIn([
       ProfileType.PARTICIPANT,
       ProfileType.PROMOTER
     ])
-    .withMessage(ValidationErrorCodes.INVALID_PROFILE_TYPE),
+    .withMessage(ValidationErrorCodes.INVALID_PROFILE_TYPE)
+    .toInt(),
   check('password')
     .isLength({ min: 8 })
     .withMessage(ValidationErrorCodes.PASSWORD_MIN_LENGTH),
@@ -49,7 +51,8 @@ export const userGetWithPaginationRouteValidation = [
   param('email')
     .optional({ checkFalsy: false })
     .isEmail()
-    .withMessage(ValidationErrorCodes.INVALID_EMAIL),
+    .withMessage(ValidationErrorCodes.INVALID_EMAIL)
+    .normalizeEmail(),
   param('profileType')
     .optional({ checkFalsy: false })
     .isIn([
@@ -57,6 +60,7 @@ export const userGetWithPaginationRouteValidation = [
       ProfileType.PARTICIPANT,
       ProfileType.PROMOTER
     ])
+    .toInt()
 ]
 
 export const userUpdateByIdRouteValidation = [
@@ -64,11 +68,13 @@ export const userUpdateByIdRouteValidation = [
     .isUUID()
     .withMessage(ValidationErrorCodes.INVALID_UUID),
   check('name')
-    .optional({ checkFalsy: false }),
+    .optional({ checkFalsy: false })
+    .trim(),
   check('email')
     .optional({ checkFalsy: false })
     .isEmail()
-    .withMessage(ValidationErrorCodes.INVALID_EMAIL),
+    .withMessage(ValidationErrorCodes.INVALID_EMAIL)
+    .normalizeEmail(),
   check('cpfCnpj')
     .optional({ checkFalsy: false })
     .custom((value, { req }) => {

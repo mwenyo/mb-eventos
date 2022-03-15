@@ -35,6 +35,7 @@ export enum ValidationErrorCodes {
   PASSWORD_CONFIRMATION_MIN_LENGTH = 'A confirmação da senha deve conter no mínimo 8 caracteres',
   INVALID_UUID = 'UUID Inválido',
   INVALID_TOKEN = 'Token inválido',
+  INVALID_BOOLEAN = 'O Valor precisa ser um booleano',
   INVALID_PROFILE_TYPE = 'Perfil de usuário inválido',
   INVALID_EMAIL = 'Formato de email inválido',
   PASSWORDS_DONT_MATCH = 'Senha e confirmação de senha não conferem',

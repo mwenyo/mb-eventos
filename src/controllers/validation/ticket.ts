@@ -8,7 +8,8 @@ export const ticketCreateRouteValidation = [
     .withMessage(ValidationErrorCodes.INVALID_UUID),
   check('quantity')
     .isInt({ gt: 0 })
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_QNT)
+    .toInt(),
 ]
 
 export const ticketUpdateByIdRouteValidation = [
@@ -17,7 +18,8 @@ export const ticketUpdateByIdRouteValidation = [
     .withMessage(ValidationErrorCodes.INVALID_UUID),
   check('status')
     .isIn([TicketStatus.CANCELLED])
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_STATUS),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_STATUS)
+    .toInt(),
 ]
 
 export const ticketGetByIdRouteValidation = [
@@ -41,5 +43,6 @@ export const ticketGetWithPaginationRouteValidation = [
     .withMessage(ValidationErrorCodes.INVALID_UUID),
   query('status')
     .isIn([TicketStatus.CANCELLED, TicketStatus.ACTIVE])
-    .withMessage(ValidationErrorCodes.INVALID_TICKET_STATUS),
+    .withMessage(ValidationErrorCodes.INVALID_TICKET_STATUS)
+    .toInt(),
 ]

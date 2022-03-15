@@ -13,6 +13,7 @@ export async function initializeDatabase(): Promise<void> {
     database: ConstantsEnv.database.name,
     port: ConstantsEnv.database.port,
 
+    logging: ['query', 'error', 'migration'],
     logger: LoggerManager.databaseLogger,
 
     migrations: [`${path.join(__dirname, 'migrations/*{.ts,.js}')}`],

@@ -77,39 +77,39 @@ export class EventService implements IEventService {
     return response;
   }
 
-  async updateById(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
+  async updateById(eventUpdateRequest: EventEntity, additionalInformation: AdditionalInformation): Promise<EventDTO | null> {
     const { actor } = additionalInformation;
 
-    const existEvent = await this.eventRepository.selectById(event.id)
+    const existEvent = await this.eventRepository.selectById(eventUpdateRequest.id)
 
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
 
     const existEvents = await this.eventRepository.selectByWhere({
       where: {
-        name: ILike(`${event.name}`),
+        name: ILike(`${eventUpdateRequest.name}`),
         status: EventStatus.FORSALE
       }
     })
 
     if (existEvents.length !== 0) throw new BusinessError(ErrorCodes.EVENT_ALREADY_EXISTS)
 
-    if (existEvent.ticketsSold > event.tickets) throw new BusinessError(ValidationErrorCodes.INVALID_TICKET_QNT)
+    if (eventUpdateRequest.tickets && existEvent.ticketsSold > eventUpdateRequest.tickets) throw new BusinessError(ValidationErrorCodes.INVALID_TICKET_QNT)
 
-    const eventToUpdate = {
-      ...event.name && { event: event.name },
-      ...event.address && { event: event.address },
-      ...event.description && { event: event.description },
-      ...event.startDate && { event: event.startDate },
-      ...event.endDate && { event: event.endDate },
-      ...event.tickets && { event: event.tickets },
-      ...event.ticketPrice && { event: event.ticketPrice },
-      ...event.limitByParticipant && { event: event.limitByParticipant },
-      ...event.status && { event: event.status },
+    const eventToUpdate: EventEntity = {
+      ...eventUpdateRequest.name !== undefined && eventUpdateRequest.name !== existEvent.name && { name: eventUpdateRequest.name },
+      ...eventUpdateRequest.address !== undefined && { address: eventUpdateRequest.address },
+      ...eventUpdateRequest.description !== undefined && { description: eventUpdateRequest.description },
+      ...eventUpdateRequest.startDate !== undefined && { startDate: eventUpdateRequest.startDate },
+      ...eventUpdateRequest.endDate !== undefined && { endDate: eventUpdateRequest.endDate },
+      ...eventUpdateRequest.tickets !== undefined && { tickets: eventUpdateRequest.tickets },
+      ...eventUpdateRequest.ticketPrice !== undefined && { ticketPrice: eventUpdateRequest.ticketPrice },
+      ...eventUpdateRequest.limitByParticipant !== undefined && { limitByParticipant: eventUpdateRequest.limitByParticipant },
+      ...eventUpdateRequest.status !== undefined && { status: eventUpdateRequest.status },
       updatedBy: (actor && actor.id) || 'SYSTEM',
     };
 
-    await this.eventRepository.updateById(event.id, eventToUpdate)
-    const response = await this.getById(event.id);
+    await this.eventRepository.updateById(eventUpdateRequest.id, eventToUpdate)
+    const response = await this.getById(eventUpdateRequest.id);
     response.promoter = userMapToDTO(response.promoter)
     return eventMapToDTO(response);
   }
