@@ -3,17 +3,17 @@ import { inject, injectable } from 'inversify';
 import TYPES from '../utilities/types';
 import BusinessError, { ErrorCodes } from '../utilities/errors/business';
 
-import TicketEntity from '../db/entities/ticket';
+import { ITicketService } from './interfaces/ticket';
 import { ITicketRepository } from '../db/repositories/interfaces/ticket';
 import { IEventRepository } from '../db/repositories/interfaces/event';
-import { ITicketService } from './interfaces/ticket';
-import { TicketDTO } from '../models/ticket';
 
 import TicketStatus from '../enumerators/ticket-status';
 import EventStatus from '../enumerators/event-status';
 import ProfileType from '../enumerators/profile-type';
 
 import EventEntity from '../db/entities/event';
+import TicketEntity from '../db/entities/ticket';
+
 import { Pagination, ISearchParameterTicket } from '../models/pagination';
 import { AdditionalInformation } from '../models/user';
 
@@ -30,7 +30,7 @@ export class TicketService implements ITicketService {
     this.eventRepository = eventRepository;
   }
 
-  async getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketDTO> {
+  async getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketEntity> {
     const { actor } = additionalInformation;
     const existTicket = await this.ticketRepository.selectById(ticketId);
 
@@ -45,7 +45,7 @@ export class TicketService implements ITicketService {
     return existTicket;
   }
 
-  async create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketDTO[]> {
+  async create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketEntity[]> {
     const { actor } = additionalInformation;
     const existEvent = await this.eventRepository.selectById(event);
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
@@ -83,7 +83,7 @@ export class TicketService implements ITicketService {
   async getWithPagination(
     searchParameter: ISearchParameterTicket | null,
     additionalInformation: AdditionalInformation
-  ): Promise<Pagination<TicketDTO> | null> {
+  ): Promise<Pagination<TicketEntity> | null> {
     const { actor } = additionalInformation;
     if (actor.profileType === ProfileType.PARTICIPANT) searchParameter.participant = actor.id;
     if (actor.profileType === ProfileType.PROMOTER) searchParameter.promoter = actor.id;
@@ -95,7 +95,7 @@ export class TicketService implements ITicketService {
     ticket: string,
     status: number,
     additionalInformation: AdditionalInformation
-  ): Promise<TicketDTO | null> {
+  ): Promise<TicketEntity | null> {
     const { actor } = additionalInformation;
     const existTicket = await this.ticketRepository.selectOneByOptions({
       where: {

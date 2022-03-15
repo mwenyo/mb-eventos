@@ -1,13 +1,12 @@
 import TicketEntity from '../../db/entities/ticket';
 import { Pagination, ISearchParameterBase } from '../../models/pagination';
 import { AdditionalInformation } from '../../models/user';
-import { TicketDTO } from '../../models/ticket';
 
 export interface ITicketService {
-  create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketDTO[]>;
-  getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketDTO>;
+  getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketEntity>;
+  create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketEntity[]>;
   getWithPagination(searchParameter: ISearchParameterBase, additionalInformation: AdditionalInformation):
-    Promise<Pagination<TicketDTO>>;
+    Promise<Pagination<TicketEntity>>;
   updateById(ticket: string, status: number, additionalInformation: AdditionalInformation):
-    Promise<TicketDTO>;
+    Promise<TicketEntity>;
 }
