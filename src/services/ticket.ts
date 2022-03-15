@@ -31,8 +31,8 @@ export class TicketService implements ITicketService {
     this.eventRepository = eventRepository;
   }
 
-  async getById(ticketId: string, additionalInformation: AdditionalInformation): Promise<TicketEntity> {
-    const { actor } = additionalInformation;
+  async getById(ticketId: string, actor: UserEntity): Promise<TicketEntity> {
+
     const existTicket = await this.ticketRepository.selectById(ticketId);
 
     if (!existTicket) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
@@ -46,8 +46,8 @@ export class TicketService implements ITicketService {
     return existTicket;
   }
 
-  async create(quantity: number, event: string, additionalInformation: AdditionalInformation): Promise<TicketEntity[]> {
-    const { actor } = additionalInformation;
+  async create(quantity: number, event: string, actor: UserEntity): Promise<TicketEntity[]> {
+
     const existEvent = await this.eventRepository.selectById(event);
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
     if (existEvent.status !== EventStatus.FORSALE) throw new BusinessError(ErrorCodes.UNAVALIABLE_EVENT);
@@ -59,10 +59,9 @@ export class TicketService implements ITicketService {
   }
 
   async getWithPagination(
-    searchParameter: ISearchParameterTicket | null,
-    additionalInformation: AdditionalInformation
+    searchParameter: ISearchParameterTicket | null, actor: UserEntity
   ): Promise<Pagination<TicketEntity> | null> {
-    const { actor } = additionalInformation;
+
     if (actor.profileType === ProfileType.PARTICIPANT) searchParameter.participant = actor.id;
     if (actor.profileType === ProfileType.PROMOTER) searchParameter.promoter = actor.id;
     const response = await this.ticketRepository.selectPagination(searchParameter);
@@ -71,10 +70,9 @@ export class TicketService implements ITicketService {
 
   async updateById(
     ticket: string,
-    status: number,
-    additionalInformation: AdditionalInformation
+    status: number, actor: UserEntity
   ): Promise<TicketEntity | null> {
-    const { actor } = additionalInformation;
+
     const existTicket = await this.ticketRepository.selectOneByOptions({
       where: {
         id: ticket,

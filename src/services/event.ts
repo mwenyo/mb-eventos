@@ -11,6 +11,7 @@ import { Pagination, ISearchParameterEvent } from '../models/pagination';
 
 import { AdditionalInformation } from '../models/user';
 import EventStatus from '../enumerators/event-status';
+import UserEntity from '../db/entities/user';
 
 @injectable()
 export class EventService implements IEventService {
@@ -22,17 +23,17 @@ export class EventService implements IEventService {
     this.eventRepository = eventRepository;
   }
 
-  async getById(eventId: string, additionalInformation: AdditionalInformation): Promise<EventEntity> {
-    const { actor } = additionalInformation;
+  async getById(eventId: string, actor: UserEntity): Promise<EventEntity> {
+
     const event = await this.eventRepository.selectById(eventId);
     if (actor.id !== event.promoter.id) delete (event.ticketsSold);
     if (!event) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
     return event;
   }
 
-  async create(event: EventEntity, additionalInformation: AdditionalInformation): Promise<EventEntity> {
+  async create(event: EventEntity, actor: UserEntity): Promise<EventEntity> {
 
-    const { actor } = additionalInformation
+
 
     const existEvent = await this.eventRepository.selectByWhere({
       where: {
@@ -68,8 +69,8 @@ export class EventService implements IEventService {
     return response;
   }
 
-  async updateById(eventUpdateRequest: EventEntity, additionalInformation: AdditionalInformation): Promise<EventEntity | null> {
-    const { actor } = additionalInformation;
+  async updateById(eventUpdateRequest: EventEntity, actor: UserEntity): Promise<EventEntity | null> {
+
 
     const existEvent = await this.eventRepository.selectById(eventUpdateRequest.id)
 
@@ -100,13 +101,12 @@ export class EventService implements IEventService {
     };
 
     await this.eventRepository.updateById(eventUpdateRequest.id, eventToUpdate)
-    const response = await this.getById(eventUpdateRequest.id, additionalInformation);
+    const response = await this.getById(eventUpdateRequest.id, actor);
     return response;
   }
 
-  async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
-    const { actor } = additionalInformation
-    const event = await this.getById(id, additionalInformation);
+  async deleteById(id: string, actor: UserEntity): Promise<boolean> {
+    const event = await this.getById(id, actor);
 
     if (!event) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
 

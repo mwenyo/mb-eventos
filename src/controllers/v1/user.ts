@@ -23,7 +23,6 @@ import { IUserService } from '../../services/interfaces/user';
 
 import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { ICustomRequest } from '../../models/custom-request';
-import { AdditionalInformation } from '../../models/user';
 import { userMapToEntity } from '../../models/mappers/user';
 
 import {
@@ -105,10 +104,8 @@ export class UserController extends BaseHttpController implements interfaces.Con
     }
     const user = userMapToEntity(req.body);
     user.id = req.params.id;
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.userService.updateById(user, additionalInformation);
+    const actor = req.user;
+    return await this.userService.updateById(user, actor);
   }
 
   @httpDelete('/:id',
@@ -117,9 +114,7 @@ export class UserController extends BaseHttpController implements interfaces.Con
   )
   private async deleteById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.userService.deleteById(req.params.id, additionalInformation);
+    const actor = req.user;
+    return await this.userService.deleteById(req.params.id, actor);
   }
 }

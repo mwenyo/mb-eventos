@@ -58,8 +58,8 @@ export class UserService implements IUserService {
     return response;
   }
 
-  async updateById(user: UserEntity, additionalInformation: AdditionalInformation): Promise<UserDTO> {
-    const { actor } = additionalInformation;
+  async updateById(user: UserEntity, actor: UserEntity): Promise<UserDTO> {
+
     const existUser = await this.userRepository.selectById(user.id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
     if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN)) throw new BusinessError(ErrorCodes.USER_BLOCKED);
@@ -98,8 +98,8 @@ export class UserService implements IUserService {
     return userMapToDTO(updatedUser);
   }
 
-  async deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean> {
-    const { actor } = additionalInformation;
+  async deleteById(id: string, actor: UserEntity): Promise<boolean> {
+
     const existUser = await this.userRepository.selectById(id);
     if (!existUser) throw new BusinessError(ErrorCodes.USER_NOT_FOUND);
     if ((actor.id !== existUser.id) && (actor.profileType !== ProfileType.ADMIN))

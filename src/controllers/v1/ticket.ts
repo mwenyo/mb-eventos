@@ -20,7 +20,7 @@ import TicketEntity from '../../db/entities/ticket';
 import { ITicketService } from '../../services/interfaces/ticket';
 
 import { ICustomRequest } from '../../models/custom-request';
-import { AdditionalInformation } from '../../models/user';
+
 import { Pagination, ISearchParameterTicket } from '../../models/pagination';
 
 import {
@@ -47,14 +47,11 @@ export class TicketController extends BaseHttpController implements interfaces.C
   )
   private async create(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
+    const actor = req.user;
     return await this.ticketService.create(
-      //parseInt(req.body.quantity),
       req.body.quantity,
       req.body.event,
-      additionalInformation
+      actor
     );
   }
 
@@ -77,10 +74,8 @@ export class TicketController extends BaseHttpController implements interfaces.C
       },
       ...controllerPaginationHelper(req),
     };
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.ticketService.getWithPagination(searchParameter, additionalInformation);
+    const actor = req.user;
+    return await this.ticketService.getWithPagination(searchParameter, actor);
   }
 
   @httpGet(
@@ -89,10 +84,8 @@ export class TicketController extends BaseHttpController implements interfaces.C
   )
   private async getById(req: ICustomRequest, res: Response): Promise<any> {
     validationRoute(req, res)
-    const additionalInformation = {
-      actor: req.user
-    }
-    return await this.ticketService.getById(req.params.id, additionalInformation);
+    const actor = req.user;
+    return await this.ticketService.getById(req.params.id, actor);
   }
 
   @httpPut('/:id',
@@ -105,9 +98,7 @@ export class TicketController extends BaseHttpController implements interfaces.C
     }
     const ticket = req.params.id;
     const status = parseInt(req.body.status);
-    const additionalInformation: AdditionalInformation = {
-      actor: req.user,
-    }
-    return await this.ticketService.updateById(ticket, status, additionalInformation);
+    const actor = req.user;
+    return await this.ticketService.updateById(ticket, status, actor);
   }
 }

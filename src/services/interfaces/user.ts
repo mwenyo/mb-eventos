@@ -7,7 +7,7 @@ export interface IUserService {
   getById(id: string): Promise<UserDTO>;
   getWithPagination(searchParameter: ISearchParameterBase):
     Promise<Pagination<UserDTO>>;
-  updateById(user: UserEntity, additionalInformation: AdditionalInformation):
+  updateById(user: UserEntity, actor: UserEntity):
     Promise<UserDTO>;
-  deleteById(id: string, additionalInformation: AdditionalInformation): Promise<boolean>;
+  deleteById(id: string, actor: UserEntity): Promise<boolean>;
 }
