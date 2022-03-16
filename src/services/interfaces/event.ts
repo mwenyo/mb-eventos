@@ -11,4 +11,6 @@ export interface IEventService {
   updateById(event: EventEntity, actor: UserEntity):
     Promise<EventEntity>;
   deleteById(id: string, actor: UserEntity): Promise<boolean>;
+  decreaseEventTicketSold(event: EventEntity): Promise<EventEntity>;
+  increaseEventTicketSold(event: EventEntity, quantity: number): Promise<EventEntity>;
 }

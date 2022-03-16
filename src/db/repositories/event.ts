@@ -94,35 +94,4 @@ export class EventRepository implements IEventRepository {
   async deleteById(id: string): Promise<DeleteResult> {
     return this.eventRepository.softDelete({ id });
   }
-
-  async decreaseEventTicketSold(event: EventEntity): Promise<EventEntity> {
-    const updatedTicketSold = event.ticketsSold - 1
-    const eventClosed = event.status === EventStatus.CLOSED;
-    const eventToUpdate = {
-      ticketsSold: updatedTicketSold,
-      ...eventClosed && { status: EventStatus.FORSALE },
-      updatedBy: 'SYSTEM',
-    };
-    await this.updateById(event.id, eventToUpdate);
-    const eventSaved = await this.selectById(event.id);
-    return eventSaved
-  }
-
-  async increaseEventTicketSold(
-    event: EventEntity,
-    quantity: number
-  ): Promise<EventEntity> {
-    const updatedTicketSold = event.ticketsSold + quantity;
-    const ticketLimitReached = updatedTicketSold > event.tickets;
-    if (ticketLimitReached) throw new BusinessError(ErrorCodes.TICKET_LIMIT_REACHED);
-    const lastTicketSold = updatedTicketSold === event.tickets;
-    const eventToUpdate = {
-      ticketsSold: updatedTicketSold,
-      ...lastTicketSold && { status: EventStatus.CLOSED },
-      updatedBy: 'SYSTEM',
-    };
-    await this.updateById(event.id, eventToUpdate);
-    const eventSaved = await this.selectById(event.id);
-    return eventSaved;
-  }
 }

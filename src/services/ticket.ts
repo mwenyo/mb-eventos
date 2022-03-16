@@ -16,18 +16,22 @@ import TicketEntity from '../db/entities/ticket';
 import { Pagination, ISearchParameterTicket } from '../models/pagination';
 import EventEntity from '../db/entities/event';
 import UserEntity from '../db/entities/user';
+import { IEventService } from './interfaces/event';
 
 @injectable()
 export class TicketService implements ITicketService {
   private ticketRepository: ITicketRepository;
   private eventRepository: IEventRepository;
+  private eventService: IEventService;
 
   constructor(
     @inject(TYPES.TicketRepository) ticketRepository: ITicketRepository,
-    @inject(TYPES.EventRepository) eventRepository: IEventRepository
+    @inject(TYPES.EventRepository) eventRepository: IEventRepository,
+    @inject(TYPES.EventService) eventService: IEventService,
   ) {
     this.ticketRepository = ticketRepository;
     this.eventRepository = eventRepository;
+    this.eventService = eventService;
   }
 
   async getById(ticketId: string, actor: UserEntity): Promise<TicketEntity> {
@@ -51,7 +55,7 @@ export class TicketService implements ITicketService {
     if (!existEvent) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND);
     if (existEvent.status !== EventStatus.FORSALE) throw new BusinessError(ErrorCodes.UNAVALIABLE_EVENT);
     if (existEvent.limitByParticipant) await this.verifyTicketLimit(existEvent, actor);
-    const eventSaved = await this.eventRepository.increaseEventTicketSold(existEvent, quantity);
+    const eventSaved = await this.eventService.increaseEventTicketSold(existEvent, quantity);
     const ticketsToSaved = this.createTicketArray(quantity, actor, eventSaved);
     const ticketsSaved = await this.ticketRepository.create(ticketsToSaved);
     return ticketsSaved;
@@ -88,7 +92,7 @@ export class TicketService implements ITicketService {
       throw new BusinessError(ErrorCodes.USER_BLOCKED);
     }
     if (status === TicketStatus.CANCELLED) {
-      await this.eventRepository.decreaseEventTicketSold(existTicket.event);
+      await this.eventService.decreaseEventTicketSold(existTicket.event);
     }
     const ticketToUpdate = {
       status,
