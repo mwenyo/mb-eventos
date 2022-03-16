@@ -13,12 +13,12 @@ import { IUserRepository } from './interfaces/user';
 export class UserRepository implements IUserRepository {
   private userRepository: Repository<UserEntity> = getRepository(UserEntity);
   private fields = [
-    'id',
-    'name',
-    'email',
-    'cpfCnpj',
-    'address',
-    'profileType',
+    'user.id',
+    'user.name',
+    'user.email',
+    'user.cpfCnpj',
+    'user.address',
+    'user.profileType',
   ]
 
   async create(user: UserEntity): Promise<UserEntity> {
