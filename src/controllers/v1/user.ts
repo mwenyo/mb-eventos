@@ -25,6 +25,7 @@ import { Pagination, ISearchParameterUser } from '../../models/pagination';
 import { ICustomRequest } from '../../models/custom-request';
 
 import {
+  userCreateAdminRouteValidation,
   userCreateRouteValidation,
   userDeleteByIdRouteValidation,
   userGetByIdRouteValidation,
@@ -47,12 +48,23 @@ export class UserController extends BaseHttpController implements interfaces.Con
     ...userCreateRouteValidation
   )
   private async create(req: ICustomRequest, res: Response): Promise<any> {
-    if (req.cookies.token) return res.status(400).json({ error: ErrorCodes.USER_BLOCKED })
+    if (req.cookies.token) return res.status(400).json({ error: ErrorCodes.USER_BLOCKED });
 
-    validationRoute(req, res)
-    const user: UserEntity = req.body
+    validationRoute(req, res);
+    const user: UserEntity = req.body;
 
     return await this.userService.create(user);
+  }
+  @httpPost('/admin',
+    authenticate,
+    authorize([ProfileType.ADMIN]),
+    ...userCreateAdminRouteValidation
+  )
+  private async createAdmin(req: ICustomRequest, res: Response): Promise<any> {
+    validationRoute(req, res);
+    const user: UserEntity = req.body;
+    const actor = req.user;
+    return await this.userService.createAdmin(user, actor);
   }
 
   @httpGet('/me', authenticate)

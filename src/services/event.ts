@@ -25,8 +25,8 @@ export class EventService implements IEventService {
   async getById(eventId: string, actor: UserEntity): Promise<EventEntity> {
 
     const event = await this.eventRepository.selectById(eventId);
-    if (actor.id !== event.promoter.id) delete (event.ticketsSold);
     if (!event) throw new BusinessError(ErrorCodes.ENTITY_NOT_FOUND)
+    if (actor.id !== event.promoter.id) delete (event.ticketsSold);
     return event;
   }
 

@@ -2,6 +2,7 @@ import { check, param } from "express-validator";
 import { cnpj, cpf } from "cpf-cnpj-validator";
 import ProfileType from "../../enumerators/profile-type";
 import BusinessError, { ValidationErrorCodes } from "../../utilities/errors/business";
+import { optional } from "inversify";
 
 export const userCreateRouteValidation = [
   check('name').exists({ checkFalsy: true, checkNull: true }).withMessage(ValidationErrorCodes.REQUIRED_FIELD)
@@ -39,6 +40,42 @@ export const userCreateRouteValidation = [
     }
     return true;
   })
+]
+
+export const userCreateAdminRouteValidation = [
+  check('name')
+    .exists({ checkFalsy: true, checkNull: true })
+    .withMessage(ValidationErrorCodes.REQUIRED_FIELD),
+  check('email')
+    .isEmail()
+    .withMessage(ValidationErrorCodes.INVALID_EMAIL)
+    .normalizeEmail(),
+  check('profileType')
+    .isIn([
+      ProfileType.ADMIN,
+    ])
+    .withMessage(ValidationErrorCodes.INVALID_PROFILE_TYPE)
+    .toInt(),
+  check('password')
+    .isLength({ min: 8 })
+    .withMessage(ValidationErrorCodes.PASSWORD_MIN_LENGTH),
+  check('passwordConfirmation')
+    .isLength({ min: 8 })
+    .withMessage(ValidationErrorCodes.PASSWORD_CONFIRMATION_MIN_LENGTH)
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new BusinessError(ValidationErrorCodes.PASSWORDS_DONT_MATCH);
+      }
+      return true;
+    }),
+  check('cpfCnpj')
+    .optional({ checkFalsy: false })
+    .custom((value, { req }) => {
+      if ((!cnpj.isValid(value)) && (!cpf.isValid(value))) {
+        throw new BusinessError(ValidationErrorCodes.INVALID_CPF_OR_CNPJ);
+      }
+      return true;
+    })
 ]
 
 export const userGetByIdRouteValidation = [

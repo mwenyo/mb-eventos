@@ -60,7 +60,6 @@ export class TicketService implements ITicketService {
   async getWithPagination(
     searchParameter: ISearchParameterTicket | null, actor: UserEntity
   ): Promise<Pagination<TicketEntity> | null> {
-
     if (actor.profileType === ProfileType.PARTICIPANT) searchParameter.participant = actor.id;
     if (actor.profileType === ProfileType.PROMOTER) searchParameter.promoter = actor.id;
     const response = await this.ticketRepository.selectPagination(searchParameter);
@@ -89,7 +88,7 @@ export class TicketService implements ITicketService {
       throw new BusinessError(ErrorCodes.USER_BLOCKED);
     }
     if (status === TicketStatus.CANCELLED) {
-      await this.eventRepository.decreaseEventTicketSold(existTicket);
+      await this.eventRepository.decreaseEventTicketSold(existTicket.event);
     }
     const ticketToUpdate = {
       status,
