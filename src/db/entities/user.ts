@@ -17,7 +17,7 @@ export default class UserEntity extends Base {
   public name?: string;
 
   @Column()
-  public cpfCpnj?: string;
+  public cpfCnpj?: string;
 
   @Column()
   public address?: string;

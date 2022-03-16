@@ -35,7 +35,7 @@ export class UserService implements IUserService {
       {
         where: [
           { email: newUser.email },
-          { cpfCpnj: newUser.cpfCpnj },
+          { cpfCnpj: newUser.cpfCnpj },
         ]
       }
     );
@@ -69,25 +69,25 @@ export class UserService implements IUserService {
             id: Not(user.id)
           },
           {
-            cpfCpnj: user.cpfCpnj,
+            cpfCnpj: user.cpfCnpj,
             id: Not(user.id)
           },
         ]
       }
     );
     if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
-    if (user.cpfCpnj) {
-      if (existUser.profileType === ProfileType.PARTICIPANT && !cpf.isValid(user.cpfCpnj)) {
+    if (user.cpfCnpj) {
+      if (existUser.profileType === ProfileType.PARTICIPANT && !cpf.isValid(user.cpfCnpj)) {
         throw new BusinessError(ValidationErrorCodes.INVALID_CPF);
       }
-      if (existUser.profileType === ProfileType.PROMOTER && !cnpj.isValid(user.cpfCpnj)) {
+      if (existUser.profileType === ProfileType.PROMOTER && !cnpj.isValid(user.cpfCnpj)) {
         throw new BusinessError(ValidationErrorCodes.INVALID_CNPJ);
       }
     }
     const userToUpdate: UserEntity = {
       ...user.name !== undefined && { name: user.name },
       ...user.address !== undefined && { address: user.address },
-      ...user.cpfCpnj !== undefined && { cpfCpnj: user.cpfCpnj },
+      ...user.cpfCnpj !== undefined && { cpfCnpj: user.cpfCnpj },
       ...user.email !== undefined && { email: user.email },
       updatedBy: actor.id ? actor.id : 'SYSTEM',
     }

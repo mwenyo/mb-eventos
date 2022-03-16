@@ -18,7 +18,7 @@ export class CreateUserTable1646939566842 implements MigrationInterface {
             type: 'varchar',
             isNullable: true,
           }, {
-            name: 'cpfCpnj',
+            name: 'cpfCnpj',
             type: 'varchar',
             isNullable: true
           }, {

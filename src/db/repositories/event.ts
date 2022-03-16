@@ -31,7 +31,7 @@ export class EventRepository implements IEventRepository {
     'event.deletedAt',
     'promoter.id',
     'promoter.name',
-    'promoter.cpfCpnj',
+    'promoter.cpfCnpj',
   ]
 
   async create(event: EventEntity): Promise<EventEntity> {
