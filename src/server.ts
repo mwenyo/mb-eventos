@@ -138,6 +138,6 @@ export class Server {
 
     const app: any = server.build();
 
-    app.listen(ConstantsEnv.port, (): void => console.log(`\n🔥 API MB Eventos Online - ${ConstantsEnv.port}\n\n`));
+    app.listen(ConstantsEnv.port, (): void => console.log(`🔥 API MB Eventos Online - ${ConstantsEnv.port}\n`));
   }
 }

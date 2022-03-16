@@ -15,6 +15,10 @@ export async function initializeDatabase(): Promise<void> {
     migrations: [`${path.join(__dirname, 'migrations/*{.ts,.js}')}`],
     entities: [`${path.join(__dirname, 'entities/*{.ts,.js}')}`],
 
+    ssl: {
+      rejectUnauthorized: false,
+    },
+
     migrationsRun: true,
   }).then(() => {
     console.log('\n📦 Database connected!')
