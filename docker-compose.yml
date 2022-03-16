@@ -1,0 +1,14 @@
+version: '2.1'
+services:
+  mb-eventos:
+    image: mb-eventos
+    build: .
+    volumes:
+      - '.:/mb-eventos'
+      - '/mb-eventos/node_modules'
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+volumes:
+  node_modules:
