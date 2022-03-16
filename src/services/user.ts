@@ -50,6 +50,26 @@ export class UserService implements IUserService {
     return response;
   }
 
+  async createAdmin(newUser: UserEntity, actor: UserEntity): Promise<UserEntity> {
+    const existInformation = await this.userRepository.selectByWhere(
+      {
+        where: [
+          { email: newUser.email },
+          { cpfCnpj: newUser.cpfCnpj },
+        ]
+      }
+    );
+    if (existInformation.length !== 0) throw new BusinessError(ErrorCodes.USER_ALREADY_EXISTS);
+    newUser = {
+      ...newUser,
+      ...newUser.password && { password: await hash(newUser.password, 10) },
+      createdBy: actor.id ? actor.id : 'SYSTEM',
+      updatedBy: actor.id ? actor.id : 'SYSTEM',
+    }
+    const response = await this.userRepository.create(newUser);
+    return response;
+  }
+
   async getWithPagination(searchParameter: ISearchParameterUser):
     Promise<Pagination<UserEntity> | null> {
     const response = await this.userRepository.selectPagination(searchParameter);
