@@ -4,13 +4,31 @@ import cors from 'cors';
 import compress from 'compression';
 import helmet from 'helmet';
 import { v4 } from 'uuid';
-
-import TYPES from './utilities/types';
+import cookieParser from 'cookie-parser';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import express, { NextFunction, Request, Response } from 'express';
+
+import './controllers';
+
+import TYPES from './utilities/types';
 import { ConstantsEnv } from './constants';
-import LoggerManager from './utilities/logger-manager';
-import cookieParser from 'cookie-parser';
+
+import { IUserService } from './services/interfaces/user';
+import { IEventService } from './services/interfaces/event';
+import { IUserCredentialService } from './services/interfaces/user-credential';
+import { UserService } from './services/user';
+import { UserRepository } from './db/repositories/user';
+import { IUserRepository } from './db/repositories/interfaces/user';
+
+import { IEventRepository } from './db/repositories/interfaces/event';
+import { UserCredentialService } from './services/user-credential';
+
+import { EventService } from './services/event';
+import { EventRepository } from './db/repositories/event';
+import { ITicketService } from './services/interfaces/ticket';
+import { ITicketRepository } from './db/repositories/interfaces/ticket';
+import { TicketService } from './services/ticket';
+import { TicketRepository } from './db/repositories/ticket';
 
 const container: Container = new Container();
 
@@ -26,7 +44,7 @@ const handleError: any = (err: any, req: Request, res: Response): void => {
   } else if (err.isForbiddenError) {
     res.sendStatus(httpStatus.FORBIDDEN);
   } else {
-    LoggerManager.log('application', {
+    console.log('Error: ', {
       err,
       type: 'error',
       req: {
@@ -57,7 +75,24 @@ export class Server {
   }
 
   configDependencies(): void {
+    container
+      .bind<IUserService>(TYPES.UserService).to(UserService);
+    container
+      .bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 
+    container
+      .bind<IEventService>(TYPES.EventService).to(EventService);
+    container
+      .bind<IEventRepository>(TYPES.EventRepository).to(EventRepository);
+
+    container
+      .bind<ITicketService>(TYPES.TicketService).to(TicketService);
+    container
+      .bind<ITicketRepository>(TYPES.TicketRepository).to(TicketRepository);
+
+    container
+      .bind<IUserCredentialService>(TYPES.UserCredentialService)
+      .to(UserCredentialService);
   }
 
   createServer(): void {
@@ -103,6 +138,6 @@ export class Server {
 
     const app: any = server.build();
 
-    app.listen(ConstantsEnv.port, (): void => console.log(`🔥 API MB Eventos Online - ${ConstantsEnv.port}`));
+    app.listen(ConstantsEnv.port, (): void => console.log(`\n🔥 API MB Eventos Online - ${ConstantsEnv.port}\n\n`));
   }
 }

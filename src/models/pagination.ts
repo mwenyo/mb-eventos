@@ -9,3 +9,21 @@ export interface ISearchParameterBase {
   isDESC: boolean;
   limit: number;
 }
+
+export interface ISearchParameterUser extends ISearchParameterBase {
+  name: string | null;
+  email: string | null;
+  profileType: string[] | null;
+}
+
+export interface ISearchParameterEvent extends ISearchParameterBase {
+  name: string | null;
+  promoter: string | null;
+}
+
+export interface ISearchParameterTicket extends ISearchParameterBase {
+  participant: string | null;
+  promoter: string | null;
+  event: string | null;
+  status: number | null;
+}
