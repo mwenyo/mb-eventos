@@ -29,7 +29,7 @@ export class Constants {
   constructor(props: any) {
     this.env = props.NODE_ENV;
     this.appName = process.env.APP_NAME;
-    this.port = parseInt(process.env.API_PORT, 10);
+    this.port = parseInt(process.env.PORT, 10) || parseInt(process.env.API_PORT, 10);
 
     this.debug = process.env.DEBUG === 'true';
 
