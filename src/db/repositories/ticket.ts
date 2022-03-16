@@ -56,7 +56,7 @@ export class TicketRepository implements ITicketRepository {
     if (searchParameter.promoter) {
       where = { ...where, event: { promoter: searchParameter.promoter } };
     }
-    if (searchParameter.status) {
+    if (searchParameter.status !== undefined) {
       where = { ...where, status: searchParameter.status };
     }
     const [rows, count] = await this.ticketRepository

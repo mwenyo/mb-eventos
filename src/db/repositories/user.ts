@@ -54,7 +54,7 @@ export class UserRepository implements IUserRepository {
       .where(where)
       .skip(searchParameter.offset)
       .take(searchParameter.limit)
-      .orderBy(searchParameter.orderBy, searchParameter.isDESC ? 'DESC' : 'ASC')
+      .orderBy('user.' + searchParameter.orderBy, searchParameter.isDESC ? 'DESC' : 'ASC')
       .getManyAndCount();
 
     return {

@@ -69,8 +69,8 @@ export class TicketController extends BaseHttpController implements interfaces.C
       ...req.query && req.query.event && {
         event: req.query.event.toString(),
       },
-      ...req.query && req.query.status && {
-        status: req.query.status.toString(),
+      ...req.query && req.query.status !== undefined && {
+        status: req.query.status,
       },
       ...controllerPaginationHelper(req),
     };
