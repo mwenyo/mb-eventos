@@ -16,7 +16,7 @@ export class UserRepository implements IUserRepository {
     'id',
     'name',
     'email',
-    'cpfCpnj',
+    'cpfCnpj',
     'address',
     'profileType',
   ]
