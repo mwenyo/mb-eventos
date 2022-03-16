@@ -9,6 +9,4 @@ export interface IEventRepository {
   selectByWhere(where: FindManyOptions<EventEntity>): Promise<EventEntity[] | null>;
   selectPagination(searchParameter: ISearchParameterBase, samePromoter: boolean): Promise<Pagination<EventEntity>>;
   deleteById(id: string): Promise<DeleteResult>;
-  decreaseEventTicketSold(event: EventEntity): Promise<EventEntity>;
-  increaseEventTicketSold(event: EventEntity, quantity: number): Promise<EventEntity>;
 }
