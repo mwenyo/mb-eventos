@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from "typeorm";
 
 export class CreateEventTable1647029399340 implements MigrationInterface {
 
@@ -65,6 +65,14 @@ export class CreateEventTable1647029399340 implements MigrationInterface {
         ],
       }),
     );
+    await queryRunner.createForeignKey('event',
+      new TableForeignKey({
+        columnNames: ['promoterId'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'user',
+        onDelete: 'RESTRICT'
+      })
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
