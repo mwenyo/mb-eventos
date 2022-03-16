@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { ICustomRequest } from 'models/custom-request';
+import { ICustomRequest } from '../../models/custom-request';
 
 export default function authorize(profileList: number[]) {
   return (req: ICustomRequest, res: Response, next: NextFunction) => {

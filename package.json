@@ -15,7 +15,7 @@
     "migration:up": "ts-node ./node_modules/typeorm/cli.js migration:run",
     "migration:down": "ts-node ./node_modules/typeorm/cli.js migration:revert",
     "start:local": "NODE_ENV=development ts-node-dev src/index.ts --respawn --transpileOnly --env development",
-    "start:dev": "npm run build && pm2 start ./ecosystem.config.js --env development"
+    "start:prod": "NODE_ENV=production npm build && node dist/index.js"
   },
   "husky": {
     "hooks": {

@@ -1,4 +1,5 @@
 import TicketEntity from '../../db/entities/ticket';
+import UserEntity from '../../db/entities/user';
 import { Pagination, ISearchParameterBase } from '../../models/pagination';
 
 
